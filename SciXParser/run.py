@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import os
-
 from parser import parser
 
 from API import parser_server
