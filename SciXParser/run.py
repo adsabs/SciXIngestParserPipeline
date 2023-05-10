@@ -6,11 +6,11 @@ from parser import parser
 from API import parser_server
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help="commands", dest="action")
+    Parser = argparse.ArgumentParser()
+    subparsers = Parser.add_subparsers(help="commands", dest="action")
     subparsers.add_parser("PARSER_API", help="Initialize Parser gRPC API")
     subparsers.add_parser("PARSER_APP", help="Initialize Parser Working Unit")
-    args = parser.parse_args()
+    args = Parser.parse_args()
 
     if args.action == "PARSER_APP":
         proj_home = os.path.realpath("/app/SciXParser/")
