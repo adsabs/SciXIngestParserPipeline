@@ -9,7 +9,7 @@ from SciXParser.parser.utils import get_schema
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
 
-class TestTemplateClient(TestCase):
+class TestParserClient(TestCase):
     def test_get_schema(self):
         logger = Logging(logging)
         schema_client = MockSchemaRegistryClient()
