@@ -1,12 +1,11 @@
 import os
+from parser.s3_methods import load_s3
 from unittest.mock import patch
 
 import boto3
 import moto
 import pytest
 from botocore.exceptions import ParamValidationError
-
-from parser.s3_methods import load_s3
 
 
 @pytest.fixture

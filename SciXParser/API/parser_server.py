@@ -6,6 +6,7 @@ import logging
 import sys
 from contextlib import contextmanager
 from datetime import datetime
+from parser import db, utils
 from pathlib import Path
 from threading import Thread
 
@@ -23,7 +24,6 @@ from API.grpc_modules.parser_grpc import (
     add_ParserInitServicer_to_server,
     add_ParserMonitorServicer_to_server,
 )
-from parser import db, utils
 
 HERE = Path(__file__).parent
 proj_home = str(HERE / "..")

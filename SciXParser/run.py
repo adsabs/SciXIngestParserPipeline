@@ -2,8 +2,9 @@ import argparse
 import asyncio
 import os
 
-from API import template_server
 from TEMPLATE import template
+
+from API import template_server
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

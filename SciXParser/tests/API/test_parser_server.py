@@ -1,5 +1,6 @@
 import logging
 from concurrent import futures
+from parser import db
 from unittest import TestCase
 
 import grpc
@@ -12,7 +13,6 @@ from API.avro_serializer import AvroSerialHelper
 from API.grpc_modules import parser_grpc
 from API.parser_client import get_schema
 from API.parser_server import Listener, Logging, Parser
-from parser import db
 from tests.API import base
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
@@ -28,9 +28,7 @@ class ParserServer(TestCase):
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
         self.logger = Logging(logging)
         self.schema_client = MockSchemaRegistryClient()
-        self.VALUE_SCHEMA_FILE = (
-            "SciXParser/tests/stubdata/AVRO_schemas/ParserInputSchema.avsc"
-        )
+        self.VALUE_SCHEMA_FILE = "SciXParser/tests/stubdata/AVRO_schemas/ParserInputSchema.avsc"
         self.VALUE_SCHEMA_NAME = "ParserInputSchema"
         self.value_schema = open(self.VALUE_SCHEMA_FILE).read()
 
@@ -38,9 +36,7 @@ class ParserServer(TestCase):
         self.schema = get_schema(self.logger, self.schema_client, self.VALUE_SCHEMA_NAME)
         self.avroserialhelper = AvroSerialHelper(self.schema, self.logger.logger)
 
-        OUTPUT_VALUE_SCHEMA_FILE = (
-            "SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc"
-        )
+        OUTPUT_VALUE_SCHEMA_FILE = "SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc"
         OUTPUT_VALUE_SCHEMA_NAME = "ParserOutputSchema"
         output_value_schema = open(OUTPUT_VALUE_SCHEMA_FILE).read()
 

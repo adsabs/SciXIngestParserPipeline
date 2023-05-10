@@ -2,10 +2,9 @@ import os
 import sys
 from logging.config import fileConfig
 
+import TEMPLATE.models as models
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-
-import TEMPLATE.models as models
 from TEMPLATE.utils import load_config
 
 # this is the Alembic Config object, which provides

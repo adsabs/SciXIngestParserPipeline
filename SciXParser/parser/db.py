@@ -1,6 +1,5 @@
 import datetime
 import logging as logger
-
 import parser.models as models
 
 logger.basicConfig(level=logger.DEBUG)
@@ -117,8 +116,6 @@ def get_PARSER_record(session, record_id):
     Return record with UUID: record_id
     """
     record_db = (
-        session.query(models.PARSER_record)
-        .filter(models.PARSER_record.id == record_id)
-        .first()
+        session.query(models.PARSER_record).filter(models.PARSER_record.id == record_id).first()
     )
     return record_db

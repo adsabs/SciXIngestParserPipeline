@@ -3,15 +3,14 @@ import logging
 import time
 from contextlib import contextmanager
 from datetime import datetime
+from parser import db, utils
+from parser.s3_methods import load_s3
 
 import redis
 from confluent_kafka.avro import AvroConsumer, AvroProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from parser import db, utils
-from parser.s3_methods import load_s3
 
 
 def init_pipeline(proj_home):

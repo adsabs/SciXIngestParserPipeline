@@ -1,11 +1,11 @@
+from parser import db
+from parser.parser import PARSER_APP
 from unittest import TestCase
 
 import base
 from confluent_kafka.avro import AvroProducer
 from mock import patch
 
-from parser import db
-from parser.parser import PARSER_APP
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
 
