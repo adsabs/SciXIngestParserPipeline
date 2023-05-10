@@ -1,11 +1,11 @@
 [project]
-name = "SciXTEMPLATE"
+name = "SciXParser"
 version = "0.0.1"
-description = "The primary TEMPLATE unit for the new NASA Science Explorer (NASA SciX) backoffice architecture"
-authors = [{ name = "First Last", email = "name@domain.root"}]
+description = "The primary Parser unit for the new NASA Science Explorer (NASA SciX) backoffice architecture"
+authors = [{ name = "Taylor Jacovich", email = "tjacovich@cfa.harvard.edu"}]
 license = { text = "GPL-3.0" }
 readme = "README.md"
-#repository = "https://github.com/tjacovich/SciXTEMPLATEPipeline"
+#repository = "https://github.com/tjacovich/SciXIngestParserPipeline"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 packages = [
-    "SciXTEMPLATE",
+    "SciXParser",
 ]
 
 dependencies = [
@@ -35,7 +35,7 @@ dependencies = [
 ]
 
 [project.urls]
-Source = "https://github.com/tjacovich/SciXTEMPLATEPipeline"
+Source = "https://github.com/tjacovich/SciXParserPipeline"
 
 [project.optional-dependencies]
 dev = [
@@ -59,17 +59,17 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=SciXTEMPLATE/TEMPLATE --cov=SciXTEMPLATE/API --cov-report=term-missing"
+addopts = "--cov=SciXParser/Parser --cov=SciXParser/API --cov-report=term-missing"
 cache_dir = ".tmp/"
 testpaths = [
-    "SciXTEMPLATE/tests",
+    "SciXParser/tests",
 ]
 pythonpath = [
-    "SciXTEMPLATE/",
+    "SciXParser/",
 ]
 
 [tool.coverage.run]
-data_file = "SciXTEMPLATE/.coverage"
+data_file = "SciXParser/.coverage"
 
 [tool.coverage.report]
 skip_empty = true
@@ -77,7 +77,7 @@ skip_covered = true
 
 [tool.isort]
 profile = "black"
-known_first_party = ["TEMPLATE", "API", "tests",]
+known_first_party = ["Parser", "API", "tests",]
 
 [tool.black]
 line-length = 99 # override black's default line-length

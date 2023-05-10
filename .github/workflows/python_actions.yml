@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
 env:
-  PGDATABASE: template
+  PGDATABASE: parser
   PGPASSWORD: postgres
   PGUSER: postgres
   PGHOST: localhost
@@ -28,9 +28,9 @@ jobs:
       postgres:
         image: postgres:14.4
         env:
-          POSTGRES_DB: template
-          POSTGRES_PASSWORD: TEMPLATE
-          POSTGRES_USER: template
+          POSTGRES_DB: parser
+          POSTGRES_PASSWORD: parser
+          POSTGRES_USER: parser
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
 
@@ -71,7 +71,7 @@ jobs:
         pip install -e '.[dev]'
 
     - name: Initialize postgres
-      working-directory: SciXTEMPLATE
+      working-directory: SciXParser
       run: |
         alembic upgrade head
 
