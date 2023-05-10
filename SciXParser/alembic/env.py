@@ -2,10 +2,10 @@ import os
 import sys
 from logging.config import fileConfig
 
-import TEMPLATE.models as models
+import parser.models as models
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from TEMPLATE.utils import load_config
+from parser.utils import load_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

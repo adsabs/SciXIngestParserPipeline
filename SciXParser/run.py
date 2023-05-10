@@ -2,20 +2,20 @@ import argparse
 import asyncio
 import os
 
-from TEMPLATE import template
+from parser import parser
 
-from API import template_server
+from API import parser_server
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help="commands", dest="action")
-    subparsers.add_parser("TEMPLATE_API", help="Initialize TEMPLATE gRPC API")
-    subparsers.add_parser("TEMPLATE_APP", help="Initialize TEMPLATE Working Unit")
+    subparsers.add_parser("PARSER_API", help="Initialize Parser gRPC API")
+    subparsers.add_parser("PARSER_APP", help="Initialize Parser Working Unit")
     args = parser.parse_args()
 
-    if args.action == "TEMPLATE_APP":
-        proj_home = os.path.realpath("/app/SciXTEMPLATE/")
-        template.init_pipeline(proj_home)
+    if args.action == "PARSER_APP":
+        proj_home = os.path.realpath("/app/SciXParser/")
+        parser.init_pipeline(proj_home)
 
-    elif args.action == "TEMPLATE_API":
-        asyncio.run(template_server.serve())
+    elif args.action == "PARSER_API":
+        asyncio.run(parser_server.serve())
