@@ -1,6 +1,8 @@
+
 {
   "type": "record",
   "name": "ParserOutput",
+  "doc": "Based on IngestDataModel release: v1.0.7",
   "fields": [
     {
         "name": "record_id",
