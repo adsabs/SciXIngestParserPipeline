@@ -5,7 +5,7 @@ import pytest
 from confluent_kafka.schema_registry import Schema
 
 from API.parser_client import Logging, input_parser, output_message
-from SciXParser.parser.utils import get_schema
+from SciXPipelineUtils.utils import get_schema
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
 
