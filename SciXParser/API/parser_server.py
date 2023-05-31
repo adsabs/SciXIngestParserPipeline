@@ -6,7 +6,8 @@ import logging
 import sys
 from contextlib import contextmanager
 from datetime import datetime
-from parser import db, utils
+from parser import db
+from SciXPipelineUtils import utils
 from pathlib import Path
 from threading import Thread
 

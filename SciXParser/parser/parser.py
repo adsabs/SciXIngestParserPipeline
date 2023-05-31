@@ -3,8 +3,9 @@ import logging
 import time
 from contextlib import contextmanager
 from datetime import datetime
-from parser import db, utils
-from parser.s3_methods import load_s3
+from parser import db
+from SciXPipelineUtils import utils
+from SciXPipelineUtils.s3_methods import load_s3_providers
 
 import redis
 from confluent_kafka.avro import AvroConsumer, AvroProducer
@@ -90,7 +91,7 @@ class PARSER_APP:
         self.logger = None
         self.schema_client = None
         self._init_logger()
-        self.s3Clients = load_s3(self.config).s3Clients
+        self.s3Clients = load_s3_providers(self.config)
         self.Session = sessionmaker(self.engine)
         self.redis = redis.StrictRedis(
             self.config.get("REDIS_HOST", "localhost"),

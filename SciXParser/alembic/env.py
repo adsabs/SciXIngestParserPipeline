@@ -2,7 +2,7 @@ import os
 import parser.models as models
 import sys
 from logging.config import fileConfig
-from parser.utils import load_config
+from SciXPipelineUtils.utils import load_config
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
