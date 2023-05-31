@@ -1,7 +1,8 @@
 import json
 from unittest import TestCase
 
-from API import avro_serializer
+from SciXPipelineUtils import avro_serializer
+
 from tests.API.base import mock_gRPC_avro_msg
 
 
