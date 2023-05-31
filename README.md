@@ -1,5 +1,6 @@
 [![Python CI actions](https://github.com/tjacovich/SciXIngestParserPipeline/actions/workflows/python_actions.yml/badge.svg)](https://github.com/tjacovich/SciXIngestParserPipeline/actions/workflows/python_actions.yml) [![Coverage Status](https://coveralls.io/repos/github/tjacovich/SciXIngestParserPipeline/badge.svg?branch=main)](https://coveralls.io/github/tjacovich/SciXIngestParserPipeline?branch=main)
 
+![Parser Pipeline Flowchart](README_assets/Parser_Pipeline_implementation.png?raw=true "Parser Pipeline Flowchart")
 # Setting Up a Development Environment
 ## Installing dependencies and hooks
 
