@@ -6,8 +6,6 @@ import logging
 import sys
 from contextlib import contextmanager
 from datetime import datetime
-from parser import db
-from SciXPipelineUtils import utils
 from pathlib import Path
 from threading import Thread
 
@@ -16,6 +14,7 @@ import redis
 from confluent_kafka.avro import AvroProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
+from SciXPipelineUtils import utils
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -25,6 +24,7 @@ from API.grpc_modules.parser_grpc import (
     add_ParserInitServicer_to_server,
     add_ParserMonitorServicer_to_server,
 )
+from parser import db
 
 HERE = Path(__file__).parent
 proj_home = str(HERE / "..")

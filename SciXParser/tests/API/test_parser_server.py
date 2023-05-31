@@ -1,6 +1,5 @@
 import logging
 from concurrent import futures
-from parser import db
 from unittest import TestCase
 
 import grpc
@@ -13,6 +12,7 @@ from API.avro_serializer import AvroSerialHelper
 from API.grpc_modules import parser_grpc
 from API.parser_client import get_schema
 from API.parser_server import Listener, Logging, Parser
+from parser import db
 from tests.API import base
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 

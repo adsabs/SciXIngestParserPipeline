@@ -1,11 +1,11 @@
 import os
-from SciXPipelineUtils.s3_methods import load_s3_providers
 from unittest.mock import patch
 
 import boto3
 import moto
 import pytest
 from botocore.exceptions import ParamValidationError
+from SciXPipelineUtils.s3_methods import load_s3_providers
 
 
 @pytest.fixture

@@ -1,9 +1,9 @@
 import argparse
 import asyncio
 import os
-from parser import parser
 
 from API import parser_server
+from parser import parser
 
 if __name__ == "__main__":
     Parser = argparse.ArgumentParser()
