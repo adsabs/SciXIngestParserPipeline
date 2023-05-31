@@ -1,6 +1,5 @@
 import logging
 from concurrent import futures
-from parser import db
 from unittest import TestCase
 
 import grpc
@@ -8,11 +7,12 @@ import pytest
 from confluent_kafka.avro import AvroProducer
 from confluent_kafka.schema_registry import Schema
 from mock import patch
+from SciXPipelineUtils.avro_serializer import AvroSerialHelper
 
-from API.avro_serializer import AvroSerialHelper
 from API.grpc_modules import parser_grpc
 from API.parser_client import get_schema
 from API.parser_server import Listener, Logging, Parser
+from parser import db
 from tests.API import base
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
@@ -71,7 +71,7 @@ class ParserServer(TestCase):
 
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
-            with pytest.raises(SystemExit):
+            with pytest.raises(grpc.RpcError):
                 stub.initParser(s)
 
     def test_Parser_server_init(self):

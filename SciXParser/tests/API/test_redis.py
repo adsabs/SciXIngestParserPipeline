@@ -1,11 +1,11 @@
 import json
 import logging
-from parser.db import write_status_redis
 from unittest import TestCase
 
 import redis
 
 import API.parser_server as hs
+from parser.db import write_status_redis
 
 
 class TestRedisReadWrite(TestCase):

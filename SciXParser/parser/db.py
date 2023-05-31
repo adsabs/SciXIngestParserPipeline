@@ -1,5 +1,6 @@
 import datetime
 import logging as logger
+
 import parser.models as models
 
 logger.basicConfig(level=logger.DEBUG)
