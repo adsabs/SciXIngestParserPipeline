@@ -94,7 +94,7 @@ def update_job_status(cls, job_hash, status=None):
     return updated
 
 
-def write_PARSER_record(cls, record_id, date, s3_key, checksum, source):
+def write_parser_record(cls, record_id, date, s3_key, parsed_metadata, source):
     """
     Write harvested record to db.
     """
@@ -103,8 +103,9 @@ def write_PARSER_record(cls, record_id, date, s3_key, checksum, source):
         PARSER_record = models.PARSER_record()
         PARSER_record.id = record_id
         PARSER_record.s3_key = s3_key
-        PARSER_record.date = date
-        PARSER_record.checksum = checksum
+        PARSER_record.parsed_data = parsed_metadata
+        PARSER_record.date_created = date
+        PARSER_record.date_modified = date
         PARSER_record.source = source
         session.add(PARSER_record)
         session.commit()
@@ -112,7 +113,28 @@ def write_PARSER_record(cls, record_id, date, s3_key, checksum, source):
     return success
 
 
-def get_PARSER_record(session, record_id):
+def update_parser_record_metadata(cls, record_id, date, parsed_metadata):
+    """
+    Write harvested record to db.
+    """
+    updated = False
+    with cls.session_scope() as session:
+        record_db = get_parser_record(session, record_id)
+        if record_db:
+            PARSER_record = models.PARSER_record()
+            PARSER_record.id = record_db.record_id
+            PARSER_record.s3_key = record_db.s3_key
+            PARSER_record.parsed_data = parsed_metadata
+            PARSER_record.date_created = record_db.date_created
+            PARSER_record.date_modified = date
+            PARSER_record.source = record_db.source
+            session.add(PARSER_record)
+            session.commit()
+            updated = True
+    return updated
+
+
+def get_parser_record(session, record_id):
     """
     Return record with UUID: record_id
     """
