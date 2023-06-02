@@ -13,6 +13,7 @@ class TestAvroSerializer(TestCase):
         msg = mock_gRPC_avro_msg().value()
         serializer = avro_serializer.AvroSerialHelper(json.dumps(schema_json))
         bitstream = serializer.avro_serializer(msg)
+        print(bitstream)
         self.assertEqual(bitstream, mock_gRPC_avro_msg().bitstream())
 
     def test_avro_deserialization(self):

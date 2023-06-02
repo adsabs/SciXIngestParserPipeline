@@ -2,7 +2,6 @@ import json
 import logging
 import time
 from contextlib import contextmanager
-from datetime import datetime
 
 import redis
 from confluent_kafka.avro import AvroConsumer, AvroProducer
@@ -12,8 +11,7 @@ from SciXPipelineUtils.s3_methods import load_s3_providers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from parser import db
-from SciXParser.parser.base import parsing_handler
+from parser import db, parsing_handler
 
 
 def init_pipeline(proj_home, consumer_topic_name=None, consumer_schema_name=None):
@@ -128,7 +126,6 @@ class PARSER_APP:
         This task will take any consumed messages and pass them to the relevant subprocesses
         as well as updating postgres and redis.
         """
-        tstamp = datetime.now()
         self.logger.debug("Received message {}".format(msg.value()))
 
         job_request = msg.value()
@@ -136,23 +133,20 @@ class PARSER_APP:
         task = job_request.get("task")
 
         job_request["status"] = "Processing"
-        db.update_job_status(self, job_request["hash"], job_request["status"])
         db.write_status_redis(
             self.redis,
-            json.dumps({"job_id": metadata_uuid, "status": job_request["status"]}),
+            json.dumps({"job_id": str(metadata_uuid), "status": job_request["status"]}),
         )
 
         if task == "REPARSE":
-            parsing_handler.reparse_handler(job_request)
+            db.update_job_status(self, job_request["record_id"], job_request["status"])
+            parsing_handler.reparse_handler(self, job_request)
 
         else:
-            parsing_handler.parse_task_selector(job_request)
+            db.write_job_status(self, job_request)
+            job_request["status"] = parsing_handler.parse_task_selector(self, job_request)
 
-        db.update_job_status(self, job_request["hash"], status=job_request["status"])
         db.write_status_redis(
             self.redis,
-            json.dumps({"job_id": job_request["hash"], "status": job_request["status"]}),
+            json.dumps({"job_id": str(job_request["record_id"]), "status": job_request["status"]}),
         )
-
-        tstamp = datetime.now()
-        self.logger.info(b"Done %s." % bytes(str(tstamp), "utf-8"))

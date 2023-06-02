@@ -1,4 +1,6 @@
 import contextlib
+import uuid
+from datetime import datetime
 from unittest import TestCase
 
 
@@ -25,12 +27,16 @@ class base_utils(TestCase):
 
 
 class mock_job_request(object):
+    def __init__(self):
+        self.record_id = uuid.uuid4()
+
     def value(self):
-        return {
-            "hash": "g425897fh3qp35890u54256342ewferht242546",
-            "task_args": {
-                "ingest_type": "metadata",
-                "daterange": "2023-03-07",
-            },
-            "task": "SYMBOL1",
-        }
+        with open("SciXParser/tests/stubdata/arxiv_raw_xml_data.xml", "r") as f:
+            record_metadata = f.read()
+            return {
+                "record_id": self.record_id,
+                "record_xml": record_metadata,
+                "s3_path": "/{}".format(self.record_id),
+                "task": "ARXIV",
+                "datetime": datetime.now(),
+            }

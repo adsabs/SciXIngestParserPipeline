@@ -12,7 +12,7 @@ REDIS_PORT = 6379
 KAFKA_BROKER = "kafka:9092"
 SCHEMA_REGISTRY_URL = "http://schema-registry:8081"
 # PARSER AVRO Schema Parameters
-PARSER_INPUT_SCHEMA = "ParserInputSchema"
+PARSER_INPUT_SCHEMA = "HarvesterOutputSchema"
 PARSER_INPUT_TOPIC = "ParserInput"
 PARSER_OUTPUT_SCHEMA = "ParserOutputSchema"
 PARSER_OUTPUT_TOPIC = "ParserOutput"

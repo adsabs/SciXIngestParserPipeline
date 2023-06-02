@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH
+	xmlns="http://www.openarchives.org/OAI/2.0/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<responseDate>2023-03-07T18:48:41Z</responseDate>
+	<request verb="GetRecord" identifier="oai:arXiv.org:2107.10460" metadataPrefix="oai_dc">http://export.arxiv.org/oai2</request>
+	<GetRecord>
+		<record>
+			<header>
+				<identifier>oai:arXiv.org:2107.10460</identifier>
+				<datestamp>2022-06-16</datestamp>
+				<setSpec>physics:cond-mat</setSpec>
+			</header>
+			<metadata>
+				<oai_dc:dc
+					xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+					xmlns:dc="http://purl.org/dc/elements/1.1/"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+					<dc:title>Anomalous High-Field Magnetotransport in CaFeAsF due to the Quantum Hall
+  Effect</dc:title>
+					<dc:creator>Terashima, Taichi</dc:creator>
+					<dc:creator>Hirose, Hishiro T.</dc:creator>
+					<dc:creator>Kikugawa, Naoki</dc:creator>
+					<dc:creator>Uji, Shinya</dc:creator>
+					<dc:creator>Graf, David</dc:creator>
+					<dc:creator>Morinari, Takao</dc:creator>
+					<dc:creator>Wang, Teng</dc:creator>
+					<dc:creator>Mu, Gang</dc:creator>
+					<dc:subject>Condensed Matter - Superconductivity</dc:subject>
+					<dc:subject>Condensed Matter - Materials Science</dc:subject>
+					<dc:subject>Condensed Matter - Strongly Correlated Electrons</dc:subject>
+					<dc:description>  CaFeAsF is an iron-based superconductor parent compound whose Fermi surface
+is quasi-two dimensional, composed of Dirac-electron and Schr\&quot;odinger-hole
+cylinders elongated along the $c$ axis. We measured the longitudinal and Hall
+resistivities in CaFeAsF with the electrical current in the $ab$ plane in
+magnetic fields up to 45 T applied along the $c$ axis and obtained the
+corresponding conductivities via tensor inversion. We found that both the
+longitudinal and Hall conductivities approached zero above $\sim$40 T as the
+temperature was lowered to 0.4 K. Our analysis indicates that the Landau-level
+filling factor is $\nu$ = 2 for both electrons and holes at these high field
+strengths, resulting in a total filling factor $\nu$ = $\nu_{hole} -
+\nu_{electron}$ = 0. We therefore argue that the $\nu$ = 0 quantum Hall state
+emerges under these conditions.
+</dc:description>
+					<dc:description>Comment: 18 pages, 1 table, 4 figures</dc:description>
+					<dc:date>2021-07-22</dc:date>
+					<dc:date>2022-06-15</dc:date>
+					<dc:type>text</dc:type>
+					<dc:identifier>http://arxiv.org/abs/2107.10460</dc:identifier>
+					<dc:identifier>npj Quantum Materials 7, 62 (2022)</dc:identifier>
+					<dc:identifier>doi:10.1038/s41535-022-00470-6</dc:identifier>
+				</oai_dc:dc>
+			</metadata>
+		</record>
+	</GetRecord>
+</OAI-PMH>

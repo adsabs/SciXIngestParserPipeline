@@ -1,4 +1,5 @@
 import logging
+import uuid
 from concurrent import futures
 from unittest import TestCase
 
@@ -81,6 +82,7 @@ class ParserServer(TestCase):
             s: AVRO message: ParserInputSchema
         """
         s = {
+            "record_id": str(uuid.uuid4()),
             "task_args": {
                 "ingest": True,
                 "ingest_type": "metadata",
@@ -94,7 +96,7 @@ class ParserServer(TestCase):
             responses = stub.initParser(s)
             for response in list(responses):
                 self.assertEqual(response.get("status"), "Pending")
-                self.assertNotEqual(response.get("hash"), None)
+                self.assertNotEqual(response.get("record_id"), None)
 
     def test_Parser_server_init_persistence(self):
         """
@@ -103,6 +105,7 @@ class ParserServer(TestCase):
             s: AVRO message: ParserInputSchema
         """
         s = {
+            "record_id": str(uuid.uuid4()),
             "task_args": {
                 "ingest": True,
                 "ingest_type": "metadata",
@@ -115,8 +118,8 @@ class ParserServer(TestCase):
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Processing")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Processing")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -129,7 +132,7 @@ class ParserServer(TestCase):
                 responses = stub.initParser(s)
                 final_response = []
                 for response in list(responses):
-                    self.assertNotEqual(response.get("hash"), None)
+                    self.assertNotEqual(response.get("record_id"), None)
                     final_response.append(response.get("status"))
                 self.assertEqual(final_response, ["Pending", "Processing", "Success"])
 
@@ -141,6 +144,7 @@ class ParserServer(TestCase):
             s: AVRO message: ParserInputSchema
         """
         s = {
+            "record_id": str(uuid.uuid4()),
             "task_args": {
                 "ingest": True,
                 "ingest_type": "metadata",
@@ -153,8 +157,8 @@ class ParserServer(TestCase):
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Processing")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Processing")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -167,7 +171,7 @@ class ParserServer(TestCase):
                 responses = stub.initParser(s)
                 final_response = []
                 for response in list(responses):
-                    self.assertNotEqual(response.get("hash"), None)
+                    self.assertNotEqual(response.get("record_id"), None)
                     final_response.append(response.get("status"))
                 self.assertEqual(final_response, ["Pending", "Processing", "Error"])
 
@@ -179,6 +183,7 @@ class ParserServer(TestCase):
             s: AVRO message: ParserInputSchema
         """
         s = {
+            "record_id": str(uuid.uuid4()),
             "task_args": {
                 "ingest": True,
                 "ingest_type": "metadata",
@@ -191,8 +196,8 @@ class ParserServer(TestCase):
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Error")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Error")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -205,7 +210,7 @@ class ParserServer(TestCase):
                 responses = stub.initParser(s)
                 final_response = []
                 for response in list(responses):
-                    self.assertNotEqual(response.get("hash"), None)
+                    self.assertNotEqual(response.get("record_id"), None)
                     final_response.append(response.get("status"))
                 self.assertEqual(final_response, ["Pending", "Error"])
 
@@ -217,14 +222,14 @@ class ParserServer(TestCase):
         """
         s = {
             "task": "MONITOR",
-            "hash": "c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da",
+            "record_id": str(uuid.uuid4()),
             "task_args": {"persistence": False},
         }
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry()
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry()
                     )
                 }
             ):
@@ -232,7 +237,7 @@ class ParserServer(TestCase):
                 responses = stub.monitorParser(s)
                 for response in list(responses):
                     self.assertEqual(response.get("status"), "Success")
-                    self.assertEqual(response.get("hash"), s.get("hash"))
+                    self.assertEqual(response.get("record_id"), s.get("record_id"))
 
     def test_Parser_server_monitor_persistent_success(self):
         """
@@ -242,15 +247,15 @@ class ParserServer(TestCase):
         """
         s = {
             "task": "MONITOR",
-            "hash": "c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da",
+            "record_id": str(uuid.uuid4()),
             "task_args": {"persistence": True},
         }
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Success")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Success")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -274,15 +279,15 @@ class ParserServer(TestCase):
         """
         s = {
             "task": "MONITOR",
-            "hash": "c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da",
+            "record_id": str(uuid.uuid4()),
             "task_args": {"persistence": True},
         }
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Error")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Error")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -306,15 +311,15 @@ class ParserServer(TestCase):
         """
         s = {
             "task": "MONITOR",
-            "hash": "c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da",
+            "record_id": str(uuid.uuid4()),
             "task_args": {"persistence": True},
         }
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Processing")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Processing")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -340,15 +345,15 @@ class ParserServer(TestCase):
         """
         s = {
             "task": "MONITOR",
-            "hash": None,
+            "record_id": str(uuid.uuid4()),
             "task_args": {"persistence": True},
         }
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
                     "write_job_status": patch.object(db, "write_job_status", return_value=True),
-                    "get_job_status_by_job_hash": patch.object(
-                        db, "get_job_status_by_job_hash", return_value=fake_db_entry("Error")
+                    "get_job_status_by_record_id": patch.object(
+                        db, "get_job_status_by_record_id", return_value=fake_db_entry("Error")
                     ),
                     "__init__": patch.object(Listener, "__init__", return_value=None),
                     "subscribe": patch.object(Listener, "subscribe", return_value=True),
@@ -370,6 +375,7 @@ class ParserServer(TestCase):
         """
         cls = Parser(self.producer, self.schema, self.schema_client, self.logger.logger)
         s = {
+            "record_id": str(uuid.uuid4()),
             "task_args": {
                 "ingest": True,
                 "ingest_type": "metadata",
@@ -383,13 +389,13 @@ class ParserServer(TestCase):
             responses = stub.initParser(s)
             output_hash = None
             for response in list(responses):
-                output_hash = response.get("hash")
+                output_hash = response.get("record_id")
                 self.assertEqual(response.get("status"), "Pending")
-                self.assertNotEqual(response.get("hash"), None)
+                self.assertNotEqual(response.get("record_id"), None)
 
                 s = {
                     "task": "MONITOR",
-                    "hash": output_hash,
+                    "record_id": output_hash,
                     "task_args": {"persistence": False},
                 }
 
@@ -401,4 +407,4 @@ class ParserServer(TestCase):
             responses = stub.monitorParser(s)
             for response in list(responses):
                 self.assertEqual(response.get("status"), "Processing")
-                self.assertEqual(response.get("hash"), s.get("hash"))
+                self.assertEqual(response.get("record_id"), s.get("record_id"))

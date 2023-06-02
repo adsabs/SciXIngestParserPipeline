@@ -11,55 +11,55 @@ def write_status_redis(redis_instance, status):
     redis_instance.publish("PARSER_statuses", status)
 
 
-def get_job_status_by_job_hash(cls, job_hashes, only_status=None):
+def get_job_status_by_record_id(cls, record_ids, only_status=None):
     """
-    Return all updates with job_hash
+    Return all updates with record_id
     """
     with cls.session_scope() as session:
         status = None
         logger.info("Opening Session")
-        for job_hash in job_hashes:
+        for record_id in record_ids:
             if only_status:
                 record_db = (
                     session.query(models.gRPC_status)
-                    .filter(models.gRPC_status.job_hash == job_hash)
+                    .filter(models.gRPC_status.record_id == record_id)
                     .filter_by(status=only_status)
                     .first()
                 )
             else:
                 record_db = (
                     session.query(models.gRPC_status)
-                    .filter(models.gRPC_status.job_hash == job_hash)
+                    .filter(models.gRPC_status.record_id == record_id)
                     .first()
                 )
             if record_db:
                 status = record_db.status
-                logger.info("{} has status: {}".format(record_db.job_hash, status))
+                logger.info("{} has status: {}".format(record_db.record_id, status))
 
     return status
 
 
-def _get_job_by_job_hash(session, job_hash, only_status=None):
+def _get_job_by_record_id(session, record_id, only_status=None):
     """
-    Return all updates with job_hash internal function
+    Return all updates with record_id internal function
     """
     logger.info("Opening Session")
 
     if only_status:
         record_db = (
             session.query(models.gRPC_status)
-            .filter(models.gRPC_status.job_hash == job_hash)
+            .filter(models.gRPC_status.record_id == record_id)
             .filter_by(status=only_status)
             .first()
         )
     else:
         record_db = (
             session.query(models.gRPC_status)
-            .filter(models.gRPC_status.job_hash == job_hash)
+            .filter(models.gRPC_status.record_id == record_id)
             .first()
         )
     if record_db:
-        logger.info("Found record: {}".format(record_db.job_hash))
+        logger.info("Found record: {}".format(record_db.record_id))
     return record_db
 
 
@@ -69,7 +69,7 @@ def write_job_status(cls, job_request, only_status=None):
     """
     with cls.session_scope() as session:
         job_status = models.gRPC_status()
-        job_status.job_hash = job_request.get("hash")
+        job_status.record_id = job_request.get("record_id")
         job_status.job_request = job_request.get("task")
         job_status.status = job_request.get("status")
         job_status.timestamp = datetime.datetime.now()
@@ -78,13 +78,13 @@ def write_job_status(cls, job_request, only_status=None):
     return True
 
 
-def update_job_status(cls, job_hash, status=None):
+def update_job_status(cls, record_id, status=None):
     """
     Update status for job previously written to db
     """
     updated = False
     with cls.session_scope() as session:
-        job_status = _get_job_by_job_hash(session, job_hash)
+        job_status = _get_job_by_record_id(session, record_id)
         if job_status:
             job_status.status = status
             job_status.timestamp = datetime.datetime.now()
