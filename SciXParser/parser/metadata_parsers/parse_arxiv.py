@@ -28,7 +28,7 @@ def parse_store_arxiv_record(app, job_request, reparse=False):
                     app, record_id, date, s3_key, parsed_record, task
                 )
         except Exception:
-            status = "ERROR"
+            status = "Error"
             db.update_job_status(app, record_id, status)
             app.logger.exception("Failed to write record {}.".format(record_id))
             return status
@@ -38,10 +38,10 @@ def parse_store_arxiv_record(app, job_request, reparse=False):
                 # app.producer.produce()
                 status = "Success"
             except Exception:
-                status = "ERROR"
+                status = "Error"
 
     except Exception:
-        status = "ERROR"
+        status = "Error"
         app.logger.exception("Failed to parse record metadata for record: {}".format(record_id))
 
     db.update_job_status(app, record_id, status)
