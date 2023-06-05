@@ -140,11 +140,13 @@ class PARSER_APP:
 
         if task == "REPARSE":
             db.update_job_status(self, job_request["record_id"], job_request["status"])
-            parsing_handler.reparse_handler(self, job_request)
+            parsing_handler.reparse_handler(self, job_request, producer)
 
         else:
             db.write_job_status(self, job_request)
-            job_request["status"] = parsing_handler.parse_task_selector(self, job_request)
+            job_request["status"] = parsing_handler.parse_task_selector(
+                self, job_request, producer
+            )
 
         db.write_status_redis(
             self.redis,

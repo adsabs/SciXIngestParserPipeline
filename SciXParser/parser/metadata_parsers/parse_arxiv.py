@@ -1,11 +1,12 @@
 from datetime import datetime
 
 from adsingestp.parsers.arxiv import ArxivParser
+from SciXPipelineUtils import utils
 
 from parser import db
 
 
-def parse_store_arxiv_record(app, job_request, reparse=False):
+def parse_store_arxiv_record(app, job_request, producer, reparse=False):
 
     record_id = job_request.get("record_id")
     s3_key = job_request.get("s3_path")
@@ -13,6 +14,9 @@ def parse_store_arxiv_record(app, job_request, reparse=False):
     metadata = job_request.get("record_xml")
     date = datetime.now()
     arxiv_parser = ArxivParser()
+    parser_output_schema = utils.get_schema(
+        app, app.schema_client, app.config.get("PARSER_OUTPUT_SCHEMA")
+    )
 
     try:
         parsed_record = arxiv_parser.parse(metadata)
@@ -35,7 +39,15 @@ def parse_store_arxiv_record(app, job_request, reparse=False):
 
         if record_status:
             try:
-                # app.producer.produce()
+                producer_message = parsed_record
+                producer_message["record_id"] = str(record_id)
+                producer_message["task"] = job_request.get("task")
+
+                producer.produce(
+                    topic=app.config.get("PARSER_OUTPUT_TOPIC"),
+                    value=producer_message,
+                    value_schema=parser_output_schema,
+                )
                 status = "Success"
             except Exception:
                 status = "Error"

@@ -4,7 +4,7 @@ from parser import db
 from parser.metadata_parsers import parse_arxiv
 
 
-def reparse_handler(app, job_request):
+def reparse_handler(app, job_request, producer):
     """
     Collects S3 information and prepares a compatible request for the task_selector
     """
@@ -20,7 +20,7 @@ def reparse_handler(app, job_request):
         try:
             for client in app.s3clients.keys():
                 app.logger.info("Attempting collect raw metadata from {} S3".format(client))
-                metadata = app.s3cleitns[client].read_s3_object(s3_path)
+                metadata = app.s3clients[client].read_s3_object(s3_path)
                 break
         except Exception:
             app.logger.error(
@@ -34,17 +34,18 @@ def reparse_handler(app, job_request):
         "task": record_entry.source,
         "datetime": date,
     }
-    return parse_task_selector(app, new_job_request, reparse=True)
+
+    return parse_task_selector(app, new_job_request, producer, reparse=True)
 
 
-def parse_task_selector(app, job_request, reparse=False):
+def parse_task_selector(app, job_request, producer, reparse=False):
     """
     Identifies the correct task and calls the appropriate parser
     """
     task = job_request.get("task")
     if task == "ARXIV":
         print("Record is arxiv")
-        parse_arxiv.parse_store_arxiv_record(app, job_request, reparse=reparse)
+        parse_arxiv.parse_store_arxiv_record(app, job_request, producer, reparse=reparse)
 
     else:
         app.logger.error("{} is not a valid data source. Stopping.".format(task))
