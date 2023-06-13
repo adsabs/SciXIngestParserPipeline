@@ -100,16 +100,21 @@ def write_parser_record(cls, record_id, date, s3_key, parsed_metadata, source):
     """
     success = False
     with cls.session_scope() as session:
-        PARSER_record = models.PARSER_record()
-        PARSER_record.id = record_id
-        PARSER_record.s3_key = s3_key
-        PARSER_record.parsed_data = parsed_metadata
-        PARSER_record.date_created = date
-        PARSER_record.date_modified = date
-        PARSER_record.source = source
-        session.add(PARSER_record)
-        session.commit()
-        success = True
+        try:
+            PARSER_record = models.PARSER_record()
+            PARSER_record.id = record_id
+            PARSER_record.s3_key = s3_key
+            PARSER_record.parsed_data = parsed_metadata
+            PARSER_record.date_created = date
+            PARSER_record.date_modified = date
+            PARSER_record.source = source
+            session.add(PARSER_record)
+            session.commit()
+            success = True
+
+        except Exception as e:
+            cls.logger.exception("Failed to write record {}.".format(record_id))
+            raise e
     return success
 
 
@@ -119,18 +124,23 @@ def update_parser_record_metadata(cls, record_id, date, parsed_metadata):
     """
     updated = False
     with cls.session_scope() as session:
-        record_db = get_parser_record(session, record_id)
-        if record_db:
-            PARSER_record = models.PARSER_record()
-            PARSER_record.id = record_db.record_id
-            PARSER_record.s3_key = record_db.s3_key
-            PARSER_record.parsed_data = parsed_metadata
-            PARSER_record.date_created = record_db.date_created
-            PARSER_record.date_modified = date
-            PARSER_record.source = record_db.source
-            session.add(PARSER_record)
-            session.commit()
-            updated = True
+        try:
+            record_db = get_parser_record(session, record_id)
+            if record_db:
+                PARSER_record = models.PARSER_record()
+                PARSER_record.id = record_db.record_id
+                PARSER_record.s3_key = record_db.s3_key
+                PARSER_record.parsed_data = parsed_metadata
+                PARSER_record.date_created = record_db.date_created
+                PARSER_record.date_modified = date
+                PARSER_record.source = record_db.source
+                session.add(PARSER_record)
+                session.commit()
+                updated = True
+        except Exception as e:
+            cls.logger.exception("Failed to write record {}.".format(record_id))
+            raise e
+
     return updated
 
 

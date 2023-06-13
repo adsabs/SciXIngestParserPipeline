@@ -32,7 +32,9 @@ class gRPC_status(Base):
     record_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     job_request = Column(String)
     status = Column(Enum(Status))
-    timestamp = Column(DateTime)
+    date_added = Column(DateTime)
+    date_of_last_success = Column(DateTime)
+    date_of_last_attempt = Column(DateTime)
 
 
 class PARSER_record(Base):

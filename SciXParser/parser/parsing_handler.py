@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from parser import db
@@ -26,6 +27,11 @@ def reparse_handler(app, job_request, producer):
             app.logger.error(
                 "Unable to find an valid s3 object for {}. Stopping.".format(metadata_uuid)
             )
+            status = "Error"
+            db.write_status_redis(app.redis, status)
+            db.update_job_status(
+                app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
+            )
 
     new_job_request = {
         "record_id": metadata_uuid,
@@ -49,3 +55,8 @@ def parse_task_selector(app, job_request, producer, reparse=False):
 
     else:
         app.logger.error("{} is not a valid data source. Stopping.".format(task))
+        status = "Error"
+        db.write_status_redis(app.redis, status)
+        db.update_job_status(
+            app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
+        )

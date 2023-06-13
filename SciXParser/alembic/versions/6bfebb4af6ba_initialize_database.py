@@ -33,7 +33,9 @@ def upgrade() -> None:
         ),
         sa.Column("job_request", sa.String(), nullable=True),
         sa.Column("status", sa.Enum(models.Status), nullable=True),
-        sa.Column("timestamp", sa.DateTime(), nullable=True),
+        sa.Column("date_added", sa.DateTime(), nullable=True),
+        sa.Column("date_of_last_attempt", sa.DateTime(), nullable=True),
+        sa.Column("date_of_last_success", sa.DateTime(), nullable=True),
         sa.UniqueConstraint("record_id"),
     )
     # ### end Alembic commands ###
