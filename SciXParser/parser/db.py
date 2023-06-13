@@ -72,7 +72,8 @@ def write_job_status(cls, job_request, only_status=None):
         job_status.record_id = job_request.get("record_id")
         job_status.job_request = job_request.get("task")
         job_status.status = job_request.get("status")
-        job_status.timestamp = datetime.datetime.now()
+        job_status.date_added = datetime.datetime.now()
+        job_status.date_of_last_attempt = job_status.date_added
         session.add(job_status)
         session.commit()
     return True
@@ -87,7 +88,9 @@ def update_job_status(cls, record_id, status=None):
         job_status = _get_job_by_record_id(session, record_id)
         if job_status:
             job_status.status = status
-            job_status.timestamp = datetime.datetime.now()
+            job_status.date_of_last_attempt = datetime.datetime.now()
+            if status == "Success":
+                job_status.date_of_last_success = job_status.date_of_last_attempt
             session.add(job_status)
             session.commit()
             updated = True
