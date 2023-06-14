@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging as logger
 
 import parser.models as models
@@ -9,6 +10,23 @@ logger.basicConfig(level=logger.DEBUG)
 def write_status_redis(redis_instance, status):
     logger.debug("Publishing status: {}".format(status))
     redis_instance.publish("PARSER_statuses", status)
+
+
+def collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid):
+    try:
+        for client in app.s3clients.keys():
+            app.logger.info("Attempting collect raw metadata from {} S3".format(client))
+            metadata = app.s3clients[client].read_s3_object(s3_path)
+            return metadata
+    except Exception:
+        app.logger.error(
+            "Unable to find a valid s3 object for {}. Stopping.".format(metadata_uuid)
+        )
+        status = "Error"
+        write_status_redis(app.redis, status)
+        update_job_status(
+            app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
+        )
 
 
 def get_job_status_by_record_id(cls, record_ids, only_status=None):

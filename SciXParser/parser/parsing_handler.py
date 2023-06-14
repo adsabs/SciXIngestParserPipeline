@@ -15,23 +15,10 @@ def reparse_handler(app, job_request, producer):
     date = datetime.now()
 
     try:
-        app.logger.info("Attempting collect raw metadata from {} S3".format("AWS"))
+        app.logger.info("Attempting to collect raw metadata from {} S3".format("AWS"))
         metadata = app.s3clients["AWS"].read_s3_object(s3_path)
     except Exception:
-        try:
-            for client in app.s3clients.keys():
-                app.logger.info("Attempting collect raw metadata from {} S3".format(client))
-                metadata = app.s3clients[client].read_s3_object(s3_path)
-                break
-        except Exception:
-            app.logger.error(
-                "Unable to find an valid s3 object for {}. Stopping.".format(metadata_uuid)
-            )
-            status = "Error"
-            db.write_status_redis(app.redis, status)
-            db.update_job_status(
-                app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
-            )
+        db.collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
 
     new_job_request = {
         "record_id": metadata_uuid,

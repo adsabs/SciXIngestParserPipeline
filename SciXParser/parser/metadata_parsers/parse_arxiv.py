@@ -56,9 +56,9 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
         status = "Error"
         app.logger.exception("Failed to parse record metadata for record: {}".format(record_id))
 
-    db.write_status_redis(app.redis_instance, status)
-    db.update_job_status(
-        app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
+    db.write_status_redis(
+        app.redis, json.dumps({"job_id": str(job_request["record_id"]), "status": status})
     )
+    db.update_job_status(app, job_request["record_id"], status)
 
     return status
