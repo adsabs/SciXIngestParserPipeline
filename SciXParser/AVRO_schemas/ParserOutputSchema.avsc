@@ -15,7 +15,7 @@
         "type": {
             "name": "taskenum",
             "type": "enum",
-            "symbols" : ["SYMBOL1", "SYMBOL2", "SYMBOL3", "SYMBOL4"]
+            "symbols" : ["ARXIV", "SYMBOL2", "SYMBOL3", "SYMBOL4"]
         }
     },
     {
