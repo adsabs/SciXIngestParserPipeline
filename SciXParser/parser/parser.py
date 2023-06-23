@@ -38,7 +38,7 @@ def init_pipeline(proj_home, consumer_topic_name=None, consumer_schema_name=None
             "bootstrap.servers": app.config.get("KAFKA_BROKER"),
             "schema.registry.url": app.config.get("SCHEMA_REGISTRY_URL"),
             "auto.offset.reset": "latest",
-            "group.id": "ParserPipeline1",
+            "group.id": "ParserPipeline" + str(consumer_schema_name),
         },
         reader_value_schema=schema,
     )
