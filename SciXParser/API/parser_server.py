@@ -1,6 +1,5 @@
 """The Python AsyncIO implementation of the GRPC parser server."""
 
-import hashlib
 import json
 import logging
 import sys
@@ -103,7 +102,7 @@ class Parser(ParserInitServicer):
 
     def persistent_connection(self, job_request, listener):
         hash = job_request.get("hash")
-        msg = db.get_job_status_by_job_hash(self, [str(hash)]).name
+        msg = db.get_job_status_by_record_id(self, [str(hash)]).name
         self.logger.info("PARSER: User requested persitent connection.")
         self.logger.info("PARSER: Latest message is: {}".format(msg))
         job_request["status"] = str(msg)
@@ -157,20 +156,15 @@ class Parser(ParserInitServicer):
 
     def initParser(self, request, context: grpc.aio.ServicerContext):
         self.logger.info("Serving initParser request %s", request)
-        tstamp = datetime.now().timestamp()
         self.logger.info(json.dumps(request.get("task_args")))
         self.logger.info(
             "Sending {} to Parser Topic".format(
                 b" %s." % json.dumps(request.get("task_args")).encode("utf-8")
             )
         )
-        hash = hashlib.sha256(bytes(str(request) + str(tstamp), "utf-8")).hexdigest()
-        self.logger.info("{}".format(hash))
-
         job_request = request
         persistence = job_request["task_args"].get("persistence", False)
         job_request["task_args"].pop("persistence")
-        job_request["hash"] = hash
 
         self.logger.info(job_request)
 
@@ -194,7 +188,7 @@ class Parser(ParserInitServicer):
         job_request = request
         persistence = job_request["task_args"].get("persistence", False)
 
-        hash = request.get("hash")
+        hash = request.get("record_id")
 
         if hash:
             if persistence:
@@ -202,7 +196,7 @@ class Parser(ParserInitServicer):
                 listener.subscribe()
                 yield from self.persistent_connection(job_request, listener)
             else:
-                msg = db.get_job_status_by_job_hash(self, [str(hash)]).name
+                msg = db.get_job_status_by_record_id(self, [str(hash)]).name
                 job_request["status"] = str(msg)
                 yield job_request
         else:
