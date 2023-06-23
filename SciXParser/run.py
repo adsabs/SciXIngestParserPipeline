@@ -27,7 +27,7 @@ if __name__ == "__main__":
         # parser.init_pipeline(proj_home)
         # Initialize parser that consumes from Harvester Output Topic
         # parser.init_pipeline(proj_home, consumer_topic_name=config.get("HARVESTER_OUTPUT_TOPIC"), consumer_schema_name=config.get("HARVESTER_OUTPUT_SCHEMA"))
-        Process(target=parser.init_pipeline, args=(proj_home)).start()
+        Process(target=parser.init_pipeline, args=(proj_home, None, None)).start()
         Process(
             target=parser.init_pipeline,
             args=(proj_home, consumer_topic_name, consumer_schema_name),
