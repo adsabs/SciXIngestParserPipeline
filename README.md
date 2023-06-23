@@ -73,4 +73,4 @@ python3 API/parser_client.py PARSER_MONITOR --job_id '<job_id>'
 
 ## Maintainers
 
-First Last
+Taylor Jacovich, Kelly Lockhart, Sergi Blanco-Cuaresma, The ADS team
