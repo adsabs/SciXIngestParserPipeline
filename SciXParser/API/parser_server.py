@@ -20,8 +20,11 @@ from sqlalchemy.orm import sessionmaker
 
 from API.grpc_modules.parser_grpc import (
     ParserInitServicer,
+    ParserMonitorServicer,
+    ParserViewServicer,
     add_ParserInitServicer_to_server,
     add_ParserMonitorServicer_to_server,
+    add_ParserViewServicer_to_server,
 )
 from parser import db
 
@@ -73,136 +76,146 @@ class Listener(Thread):
                         yield status
 
 
-class Parser(ParserInitServicer):
-    def __init__(self, producer, schema, schema_client, logger):
-        self.topic = config.get("PARSER_INPUT_TOPIC")
-        self.timestamp = datetime.now().timestamp()
-        self.producer = producer
-        self.schema = schema
-        self.schema_client = schema_client
-        self.serializer = AvroSerializer(
-            schema_registry_client=self.schema_client, schema_str=self.schema
-        )
-        self.engine = create_engine(config.get("SQLALCHEMY_URL"))
-        self.Session = sessionmaker(self.engine)
-        self.logger = logger
-
-    @contextmanager
-    def session_scope(self):
-        """Provide a transactional scope for postgres."""
-        session = self.Session()
-        try:
-            yield session
-            session.commit()
-        except Exception:
-            session.rollback()
-            raise
-        finally:
-            session.close()
-
-    def persistent_connection(self, job_request, listener):
-        hash = job_request.get("hash")
-        msg = db.get_job_status_by_record_id(self, [str(hash)]).name
-        self.logger.info("PARSER: User requested persitent connection.")
-        self.logger.info("PARSER: Latest message is: {}".format(msg))
-        job_request["status"] = str(msg)
-        yield job_request
-        if msg == "Error":
-            Done = True
-            self.logger.debug("Error = {}".format(Done))
-            listener.end = True
-        elif msg == "Success":
-            Done = True
-            self.logger.debug("Done = {}".format(Done))
-            listener.end = True
-        else:
-            Done = False
-        old_msg = msg
-        while not Done:
-            if msg and msg != old_msg:
-                self.logger.info("yielded new status: {}".format(msg))
-                job_request["status"] = str(msg)
-                yield job_request
-                old_msg = msg
-                try:
-                    if msg == "Error":
-                        Done = True
-                        self.logger.debug("Error = {}".format(Done))
-                        listener.end = True
-                        break
-                    elif msg == "Success":
-                        Done = True
-                        self.logger.debug("Done = {}".format(Done))
-                        listener.end = True
-                        break
-
-                except Exception:
-                    continue
-                try:
-                    msg = next(listener.get_status_redis(hash, self.logger))
-                    self.logger.debug("PARSER: Redis returned: {} for job_id".format(msg))
-                except Exception:
-                    msg = ""
-                    continue
-
-            else:
-                try:
-                    msg = next(listener.get_status_redis(hash, self.logger))
-                    self.logger.debug("PARSER: Redis published status: {}".format(msg))
-                except Exception as e:
-                    self.logger.error("failed to read message with error: {}.".format(e))
-                    continue
-        return
-
-    def initParser(self, request, context: grpc.aio.ServicerContext):
-        self.logger.info("Serving initParser request %s", request)
-        self.logger.info(json.dumps(request.get("task_args")))
-        self.logger.info(
-            "Sending {} to Parser Topic".format(
-                b" %s." % json.dumps(request.get("task_args")).encode("utf-8")
+def initialize_parser(gRPC_Servicer=ParserInitServicer):
+    class Parser(gRPC_Servicer):
+        def __init__(self, producer, schema, schema_client, logger, servicer):
+            self.topic = config.get("PARSER_INPUT_TOPIC")
+            self.timestamp = datetime.now().timestamp()
+            self.producer = producer
+            self.schema = schema
+            self.schema_client = schema_client
+            self.serializer = AvroSerializer(
+                schema_registry_client=self.schema_client, schema_str=self.schema
             )
-        )
-        job_request = request
-        persistence = job_request["task_args"].get("persistence", False)
-        job_request["task_args"].pop("persistence")
+            self.engine = create_engine(config.get("SQLALCHEMY_URL"))
+            self.Session = sessionmaker(self.engine)
+            self.logger = logger
 
-        self.logger.info(job_request)
+        @contextmanager
+        def session_scope(self):
+            """Provide a transactional scope for postgres."""
+            session = self.Session()
+            try:
+                yield session
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            finally:
+                session.close()
 
-        job_request["status"] = "Pending"
+        def persistent_connection(self, job_request, listener):
+            record_id = job_request.get("record_id")
+            msg = db.get_job_status_by_record_id(self, [str(record_id)]).name
+            self.logger.info("PARSER: User requested persitent connection.")
+            self.logger.info("PARSER: Latest message is: {}".format(msg))
+            job_request["status"] = str(msg)
+            yield job_request
+            if msg == "Error":
+                Done = True
+                self.logger.debug("Error = {}".format(Done))
+                listener.end = True
+            elif msg == "Success":
+                Done = True
+                self.logger.debug("Done = {}".format(Done))
+                listener.end = True
+            else:
+                Done = False
+            old_msg = msg
+            while not Done:
+                if msg and msg != old_msg:
+                    self.logger.info("yielded new status: {}".format(msg))
+                    job_request["status"] = str(msg)
+                    yield job_request
+                    old_msg = msg
+                    try:
+                        if msg == "Error":
+                            Done = True
+                            self.logger.debug("Error = {}".format(Done))
+                            listener.end = True
+                            break
+                        elif msg == "Success":
+                            Done = True
+                            self.logger.debug("Done = {}".format(Done))
+                            listener.end = True
+                            break
 
-        self.producer.produce(topic=self.topic, value=job_request, value_schema=self.schema)
+                    except Exception:
+                        continue
+                    try:
+                        msg = next(listener.get_status_redis(record_id, self.logger))
+                        self.logger.debug("PARSER: Redis returned: {} for job_id".format(msg))
+                    except Exception:
+                        msg = ""
+                        continue
 
-        db.write_job_status(self, job_request)
+                else:
+                    try:
+                        msg = next(listener.get_status_redis(record_id, self.logger))
+                        self.logger.debug("PARSER: Redis published status: {}".format(msg))
+                    except Exception as e:
+                        self.logger.error("failed to read message with error: {}.".format(e))
+                        continue
+            return
 
-        yield job_request
+        def initParser(self, request, context: grpc.aio.ServicerContext):
+            self.logger.info("Serving initParser request %s", request)
+            self.logger.info(json.dumps(request.get("task_args")))
+            self.logger.info(
+                "Sending {} to Parser Topic".format(
+                    b" %s." % json.dumps(request.get("task_args")).encode("utf-8")
+                )
+            )
+            job_request = request
+            persistence = job_request.get("persistence", False)
+            job_request.pop("persistence")
 
-        if persistence:
-            listener = Listener()
-            listener.subscribe()
-            yield from self.persistent_connection(job_request, listener)
+            self.logger.info(job_request)
 
-    def monitorParser(self, request, context: grpc.aio.ServicerContext):
-        self.logger.info("%s", request)
-        self.logger.info(json.dumps(request.get("task_args")))
+            job_request["status"] = "Pending"
 
-        job_request = request
-        persistence = job_request["task_args"].get("persistence", False)
+            self.producer.produce(topic=self.topic, value=job_request, value_schema=self.schema)
 
-        hash = request.get("record_id")
+            db.write_job_status(self, job_request)
 
-        if hash:
+            yield job_request
+
             if persistence:
                 listener = Listener()
                 listener.subscribe()
                 yield from self.persistent_connection(job_request, listener)
+
+        def viewParser(self, request, context: grpc.aio.ServicerContext):
+            self.logger.info("Serving viewParser request %s", request)
+            self.logger.info(json.dumps(request.get("task_args")))
+            record_id = request["record_id"]
+            record = db.get_parser_record(self, record_id).parsed_data
+            return record
+
+        def monitorParser(self, request, context: grpc.aio.ServicerContext):
+            self.logger.info("%s", request)
+            self.logger.info(json.dumps(request.get("task_args")))
+
+            job_request = request
+            persistence = job_request.get("persistence", False)
+
+            record_id = request.get("record_id")
+
+            if record_id:
+                if persistence:
+                    listener = Listener()
+                    listener.subscribe()
+                    yield from self.persistent_connection(job_request, listener)
+                else:
+                    msg = db.get_job_status_by_record_id(self, [str(record_id)]).name
+                    job_request["status"] = str(msg)
+                    yield job_request
             else:
-                msg = db.get_job_status_by_record_id(self, [str(hash)]).name
-                job_request["status"] = str(msg)
+                msg = "Error"
+                job_request["status"] = msg
                 yield job_request
-        else:
-            msg = "Error"
-            job_request["status"] = msg
-            yield job_request
+
+    return Parser
 
 
 async def serve() -> None:
@@ -219,10 +232,25 @@ async def serve() -> None:
     )
 
     add_ParserInitServicer_to_server(
-        Parser(producer, schema, schema_client, app_log.logger), server, avroserialhelper
+        initialize_parser(ParserInitServicer)(
+            producer, schema, schema_client, app_log.logger, ParserInitServicer.initParser
+        ),
+        server,
+        avroserialhelper,
+    )
+    add_ParserViewServicer_to_server(
+        initialize_parser(ParserViewServicer)(
+            producer, schema, schema_client, app_log.logger, ParserViewServicer.viewParser
+        ),
+        server,
+        avroserialhelper,
     )
     add_ParserMonitorServicer_to_server(
-        Parser(producer, schema, schema_client, app_log.logger), server, avroserialhelper
+        initialize_parser(ParserMonitorServicer)(
+            producer, schema, schema_client, app_log.logger, ParserMonitorServicer.monitorParser
+        ),
+        server,
+        avroserialhelper,
     )
     listen_addr = "[::]:" + str(config.get("GRPC_PORT", 50051))
     server.add_insecure_port(listen_addr)

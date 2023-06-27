@@ -29,30 +29,27 @@ class TestParserClient(TestCase):
 
     def test_input_parser(self):
         input_args = [
-            "PARSER_MONITOR",
-            "--job_id",
+            "MONITOR",
+            "--uuid",
             "'c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da'",
         ]
         args = input_parser(input_args)
         self.assertEqual(args.action, input_args[0])
-        self.assertEqual(args.job_id, input_args[2])
+        self.assertEqual(args.uuid, input_args[2])
 
         s = output_message(args)
         self.assertEqual(s["task"], "MONITOR")
 
         input_args = [
-            "PARSER_INIT",
-            "--task",
-            "SYMBOL1",
-            "--task_args",
-            '{"ingest": "True", "ingest_type": "metadata", "daterange":"2023-04-26"}',
+            "REPARSE",
+            "--uuid",
+            "'c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da'",
             "--persistence",
         ]
         args = input_parser(input_args)
         self.assertEqual(args.action, input_args[0])
-        self.assertEqual(args.task, input_args[2])
-        self.assertEqual(args.job_args, input_args[4])
+        self.assertEqual(args.uuid, input_args[2])
         self.assertEqual(args.persistence, True)
 
         s = output_message(args)
-        self.assertEqual(s["task"], "SYMBOL1")
+        self.assertEqual(s["task"], "REPARSE")

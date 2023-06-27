@@ -6,18 +6,13 @@ class mock_gRPC_avro_msg:
     def value(self):
         return {
             "record_id": "g425897fh3qp35890u54256342ewferht242546",
-            "task": "SYMBOL1",
+            "task": "REPARSE",
             "status": None,
-            "task_args": {
-                "ingest": None,
-                "ingest_type": "metadata",
-                "daterange": "2023-03-07",
-                "persistence": None,
-            },
+            "persistence": None,
         }
 
     def bitstream(self):
-        return b"\x00Ng425897fh3qp35890u54256342ewferht242546\x02\x00\x00\x02\x10metadata\x02\x142023-03-07\x02"
+        return b"\x00Ng425897fh3qp35890u54256342ewferht242546\x00\x00\x00"
 
 
 class base_utils(TestCase):

@@ -39,6 +39,12 @@
 			],
 			"doc": "An enumerated type for specifying status.",
 			"default": null
+		},
+		{
+			"name": "persistence",
+			"type": ["null", "boolean"],
+			"doc": "Dictates whether connection is persistent.",
+			"default": null
 		}
 	]
 }

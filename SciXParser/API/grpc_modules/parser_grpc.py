@@ -1,6 +1,8 @@
 """Client and server classes for gRPC services."""
 import grpc
 
+"""gRPC definitions for reparse"""
+
 
 class ParserInitStub(object):
     """The Stub for connecting to the Parser init service."""
@@ -71,6 +73,83 @@ class ParserInit(object):
             timeout,
             metadata,
         )
+
+
+"""gRPC definitions for Viewing Parsed data"""
+
+
+class ParserViewStub(object):
+    """The Stub for connecting to the Parser init service."""
+
+    def __init__(self, channel, avroserialhelper):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.viewParser = channel.unary_stream(
+            "/parseraapi.ParserView/viewParser",
+            request_serializer=avroserialhelper.avro_serializer,
+            response_deserializer=avroserialhelper.avro_deserializer,
+        )
+
+
+class ParserViewServicer(object):
+    """The servicer definition for initiating jobs with the Parser pipeline."""
+
+    def viewParser(self, request, context):
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+
+def add_ParserViewServicer_to_server(servicer, server, avroserialhelper):
+    """The actual methods for sending and receiving RPC calls."""
+    rpc_method_handlers = {
+        "viewParser": grpc.unary_stream_rpc_method_handler(
+            servicer.viewParser,
+            request_deserializer=avroserialhelper.avro_deserializer,
+            response_serializer=avroserialhelper.avro_serializer,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        "parseraapi.ParserView", rpc_method_handlers
+    )
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+class ParserView(object):
+    """The definition of the Parser gRPC API and stream connections."""
+
+    @staticmethod
+    def viewParser(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            "/parseraapi.ParserView/viewParser",
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+
+"""gRPC definitions for monitoring an active job"""
 
 
 class ParserMonitorStub(object):

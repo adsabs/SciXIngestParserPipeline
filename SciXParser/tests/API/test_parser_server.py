@@ -12,7 +12,7 @@ from SciXPipelineUtils.avro_serializer import AvroSerialHelper
 
 from API.grpc_modules import parser_grpc
 from API.parser_client import get_schema
-from API.parser_server import Listener, Logging, Parser
+from API.parser_server import Listener, Logging, initialize_parser
 from parser import db
 from tests.API import base
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
@@ -45,13 +45,25 @@ class ParserServer(TestCase):
         self.producer = AvroProducer({}, schema_registry=MockSchemaRegistryClient())
 
         parser_grpc.add_ParserInitServicer_to_server(
-            Parser(self.producer, self.schema, self.schema_client, self.logger.logger),
+            initialize_parser()(
+                self.producer,
+                self.schema,
+                self.schema_client,
+                self.logger.logger,
+                parser_grpc.ParserInitServicer.initParser,
+            ),
             self.server,
             self.avroserialhelper,
         )
 
         parser_grpc.add_ParserMonitorServicer_to_server(
-            Parser(self.producer, self.schema, self.schema_client, self.logger.logger),
+            initialize_parser(parser_grpc.ParserMonitorServicer)(
+                self.producer,
+                self.schema,
+                self.schema_client,
+                self.logger.logger,
+                parser_grpc.ParserMonitorServicer.monitorParser,
+            ),
             self.server,
             self.avroserialhelper,
         )
@@ -81,16 +93,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "record_id": str(uuid.uuid4()),
-            "task_args": {
-                "ingest": True,
-                "ingest_type": "metadata",
-                "daterange": "2023-04-26",
-                "persistence": False,
-            },
-            "task": "SYMBOL1",
-        }
+        s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
             responses = stub.initParser(s)
@@ -104,16 +107,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "record_id": str(uuid.uuid4()),
-            "task_args": {
-                "ingest": True,
-                "ingest_type": "metadata",
-                "daterange": "2023-04-26",
-                "persistence": True,
-            },
-            "task": "SYMBOL1",
-        }
+        s = {"record_id": str(uuid.uuid4()), "persistence": True, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -143,16 +137,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "record_id": str(uuid.uuid4()),
-            "task_args": {
-                "ingest": True,
-                "ingest_type": "metadata",
-                "daterange": "2023-04-26",
-                "persistence": True,
-            },
-            "task": "SYMBOL1",
-        }
+        s = {"record_id": str(uuid.uuid4()), "persistence": True, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -184,13 +169,8 @@ class ParserServer(TestCase):
         """
         s = {
             "record_id": str(uuid.uuid4()),
-            "task_args": {
-                "ingest": True,
-                "ingest_type": "metadata",
-                "daterange": "2023-04-26",
-                "persistence": True,
-            },
-            "task": "SYMBOL1",
+            "persistence": True,
+            "task": "REPARSE",
         }
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
@@ -220,11 +200,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "task": "MONITOR",
-            "record_id": str(uuid.uuid4()),
-            "task_args": {"persistence": False},
-        }
+        s = {"task": "MONITOR", "record_id": str(uuid.uuid4()), "persistence": False}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -245,11 +221,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "task": "MONITOR",
-            "record_id": str(uuid.uuid4()),
-            "task_args": {"persistence": True},
-        }
+        s = {"task": "MONITOR", "record_id": str(uuid.uuid4()), "persistence": True}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -277,11 +249,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "task": "MONITOR",
-            "record_id": str(uuid.uuid4()),
-            "task_args": {"persistence": True},
-        }
+        s = {"task": "MONITOR", "record_id": str(uuid.uuid4()), "persistence": True}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -309,11 +277,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "task": "MONITOR",
-            "record_id": str(uuid.uuid4()),
-            "task_args": {"persistence": True},
-        }
+        s = {"task": "MONITOR", "record_id": str(uuid.uuid4()), "persistence": True}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -343,11 +307,7 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {
-            "task": "MONITOR",
-            "record_id": str(uuid.uuid4()),
-            "task_args": {"persistence": True},
-        }
+        s = {"task": "MONITOR", "record_id": str(uuid.uuid4()), "persistence": True}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
@@ -373,17 +333,14 @@ class ParserServer(TestCase):
         An end-to-end test of the gRPC server that sends an INIT request to the server,
         and the monitors it with the MONITOR task.
         """
-        cls = Parser(self.producer, self.schema, self.schema_client, self.logger.logger)
-        s = {
-            "record_id": str(uuid.uuid4()),
-            "task_args": {
-                "ingest": True,
-                "ingest_type": "metadata",
-                "daterange": "2023-04-26",
-                "persistence": False,
-            },
-            "task": "SYMBOL1",
-        }
+        cls = initialize_parser()(
+            self.producer,
+            self.schema,
+            self.schema_client,
+            self.logger.logger,
+            parser_grpc.ParserInitServicer.initParser,
+        )
+        s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
             responses = stub.initParser(s)
@@ -396,7 +353,7 @@ class ParserServer(TestCase):
                 s = {
                     "task": "MONITOR",
                     "record_id": output_hash,
-                    "task_args": {"persistence": False},
+                    "persistence": False,
                 }
 
         # Test update_job_status as well to mimic the Pipeline updating the status.
