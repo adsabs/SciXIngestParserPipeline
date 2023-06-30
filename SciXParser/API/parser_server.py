@@ -78,14 +78,19 @@ class Listener(Thread):
 
 def initialize_parser(gRPC_Servicer=ParserInitServicer):
     class Parser(gRPC_Servicer):
-        def __init__(self, producer, schema, schema_client, logger, servicer):
+        def __init__(self, producer, req_schema, resp_schema, schema_client, logger):
             self.topic = config.get("PARSER_INPUT_TOPIC")
             self.timestamp = datetime.now().timestamp()
             self.producer = producer
-            self.schema = schema
+            self.req_schema = req_schema
+            self.resp_schema = resp_schema
+            if not self.resp_schema:
+                self.resp_schema = req_schema
             self.schema_client = schema_client
             self.serializer = AvroSerializer(
-                schema_registry_client=self.schema_client, schema_str=self.schema
+                schema_registry_client=self.schema_client,
+                ser_schema=self.resp_schema,
+                des_schema=self.req_schema,
             )
             self.engine = create_engine(config.get("SQLALCHEMY_URL"))
             self.Session = sessionmaker(self.engine)
@@ -232,23 +237,17 @@ async def serve() -> None:
     )
 
     add_ParserInitServicer_to_server(
-        initialize_parser(ParserInitServicer)(
-            producer, schema, schema_client, app_log.logger, ParserInitServicer.initParser
-        ),
+        initialize_parser(ParserInitServicer)(producer, schema, schema_client, app_log.logger),
         server,
         avroserialhelper,
     )
     add_ParserViewServicer_to_server(
-        initialize_parser(ParserViewServicer)(
-            producer, schema, schema_client, app_log.logger, ParserViewServicer.viewParser
-        ),
+        initialize_parser(ParserViewServicer)(producer, schema, schema_client, app_log.logger),
         server,
         avroserialhelper,
     )
     add_ParserMonitorServicer_to_server(
-        initialize_parser(ParserMonitorServicer)(
-            producer, schema, schema_client, app_log.logger, ParserMonitorServicer.monitorParser
-        ),
+        initialize_parser(ParserMonitorServicer)(producer, schema, schema_client, app_log.logger),
         server,
         avroserialhelper,
     )

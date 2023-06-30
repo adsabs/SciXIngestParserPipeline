@@ -46,11 +46,7 @@ class ParserServer(TestCase):
 
         parser_grpc.add_ParserInitServicer_to_server(
             initialize_parser()(
-                self.producer,
-                self.schema,
-                self.schema_client,
-                self.logger.logger,
-                parser_grpc.ParserInitServicer.initParser,
+                self.producer, self.schema, self.schema_client, self.logger.logger
             ),
             self.server,
             self.avroserialhelper,
@@ -58,11 +54,7 @@ class ParserServer(TestCase):
 
         parser_grpc.add_ParserMonitorServicer_to_server(
             initialize_parser(parser_grpc.ParserMonitorServicer)(
-                self.producer,
-                self.schema,
-                self.schema_client,
-                self.logger.logger,
-                parser_grpc.ParserMonitorServicer.monitorParser,
+                self.producer, self.schema, self.schema_client, self.logger.logger
             ),
             self.server,
             self.avroserialhelper,
@@ -334,11 +326,7 @@ class ParserServer(TestCase):
         and the monitors it with the MONITOR task.
         """
         cls = initialize_parser()(
-            self.producer,
-            self.schema,
-            self.schema_client,
-            self.logger.logger,
-            parser_grpc.ParserInitServicer.initParser,
+            self.producer, self.schema, self.schema_client, self.logger.logger
         )
         s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
