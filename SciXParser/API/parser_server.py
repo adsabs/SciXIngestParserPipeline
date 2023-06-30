@@ -77,14 +77,11 @@ class Listener(Thread):
 
 def initialize_parser(gRPC_Servicer=ParserInitServicer):
     class Parser(gRPC_Servicer):
-        def __init__(self, producer, req_schema, resp_schema, schema_client, logger):
+        def __init__(self, producer, req_schema, schema_client, logger):
             self.topic = config.get("PARSER_INPUT_TOPIC")
             self.timestamp = datetime.now().timestamp()
             self.producer = producer
             self.req_schema = req_schema
-            self.resp_schema = resp_schema
-            if not self.resp_schema:
-                self.resp_schema = req_schema
             self.schema_client = schema_client
             self.engine = create_engine(config.get("SQLALCHEMY_URL"))
             self.Session = sessionmaker(self.engine)
@@ -223,8 +220,12 @@ async def serve() -> None:
     server = grpc.aio.server()
     app_log = Logging(logging)
     schema_client = SchemaRegistryClient({"url": config.get("SCHEMA_REGISTRY_URL")})
-    schema = utils.get_schema(app_log, schema_client, config.get("PARSER_INPUT_SCHEMA"))
-    avroserialhelper = AvroSerialHelper(schema, app_log.logger)
+    main_schema = utils.get_schema(app_log, schema_client, config.get("PARSER_INPUT_SCHEMA"))
+    data_schema = utils.get_schema(app_log, schema_client, config.get("PARSER_OUTPUT_SCHEMA"))
+    mainserialhelper = AvroSerialHelper(ser_schema=main_schema, logger=app_log.logger)
+    viewserialhelper = AvroSerialHelper(
+        ser_schema=data_schema, des_schema=main_schema, logger=app_log.logger
+    )
     producer = AvroProducer(
         {
             "schema.registry.url": config.get("SCHEMA_REGISTRY_URL"),
@@ -234,24 +235,24 @@ async def serve() -> None:
 
     add_ParserInitServicer_to_server(
         initialize_parser(ParserInitServicer)(
-            producer, schema, schema, schema_client, app_log.logger
+            producer, main_schema, schema_client, app_log.logger
         ),
         server,
-        avroserialhelper,
+        mainserialhelper,
     )
     add_ParserViewServicer_to_server(
         initialize_parser(ParserViewServicer)(
-            producer, schema, schema, schema_client, app_log.logger
+            producer, main_schema, schema_client, app_log.logger
         ),
         server,
-        avroserialhelper,
+        viewserialhelper,
     )
     add_ParserMonitorServicer_to_server(
         initialize_parser(ParserMonitorServicer)(
-            producer, schema, schema, schema_client, app_log.logger
+            producer, main_schema, schema_client, app_log.logger
         ),
         server,
-        avroserialhelper,
+        mainserialhelper,
     )
     listen_addr = "[::]:" + str(config.get("GRPC_PORT", 50051))
     server.add_insecure_port(listen_addr)
