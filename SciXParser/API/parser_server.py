@@ -12,7 +12,6 @@ import grpc
 import redis
 from confluent_kafka.avro import AvroProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
-from confluent_kafka.schema_registry.avro import AvroSerializer
 from SciXPipelineUtils import utils
 from SciXPipelineUtils.avro_serializer import AvroSerialHelper
 from sqlalchemy import create_engine
@@ -87,11 +86,6 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
             if not self.resp_schema:
                 self.resp_schema = req_schema
             self.schema_client = schema_client
-            self.serializer = AvroSerializer(
-                schema_registry_client=self.schema_client,
-                ser_schema=self.resp_schema,
-                des_schema=self.req_schema,
-            )
             self.engine = create_engine(config.get("SQLALCHEMY_URL"))
             self.Session = sessionmaker(self.engine)
             self.logger = logger
@@ -179,7 +173,9 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
 
             job_request["status"] = "Pending"
 
-            self.producer.produce(topic=self.topic, value=job_request, value_schema=self.schema)
+            self.producer.produce(
+                topic=self.topic, value=job_request, value_schema=self.req_schema
+            )
 
             db.write_job_status(self, job_request)
 
@@ -237,17 +233,23 @@ async def serve() -> None:
     )
 
     add_ParserInitServicer_to_server(
-        initialize_parser(ParserInitServicer)(producer, schema, schema_client, app_log.logger),
+        initialize_parser(ParserInitServicer)(
+            producer, schema, schema, schema_client, app_log.logger
+        ),
         server,
         avroserialhelper,
     )
     add_ParserViewServicer_to_server(
-        initialize_parser(ParserViewServicer)(producer, schema, schema_client, app_log.logger),
+        initialize_parser(ParserViewServicer)(
+            producer, schema, schema, schema_client, app_log.logger
+        ),
         server,
         avroserialhelper,
     )
     add_ParserMonitorServicer_to_server(
-        initialize_parser(ParserMonitorServicer)(producer, schema, schema_client, app_log.logger),
+        initialize_parser(ParserMonitorServicer)(
+            producer, schema, schema, schema_client, app_log.logger
+        ),
         server,
         avroserialhelper,
     )

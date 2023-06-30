@@ -35,7 +35,7 @@ class ParserServer(TestCase):
 
         self.schema_client.register(self.VALUE_SCHEMA_NAME, Schema(self.value_schema, "AVRO"))
         self.schema = get_schema(self.logger, self.schema_client, self.VALUE_SCHEMA_NAME)
-        self.avroserialhelper = AvroSerialHelper(self.schema, self.logger.logger)
+        self.avroserialhelper = AvroSerialHelper(ser_schema=self.schema, logger=self.logger.logger)
 
         OUTPUT_VALUE_SCHEMA_FILE = "SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc"
         OUTPUT_VALUE_SCHEMA_NAME = "ParserOutputSchema"
@@ -46,7 +46,7 @@ class ParserServer(TestCase):
 
         parser_grpc.add_ParserInitServicer_to_server(
             initialize_parser()(
-                self.producer, self.schema, self.schema_client, self.logger.logger
+                self.producer, self.schema, self.schema, self.schema_client, self.logger.logger
             ),
             self.server,
             self.avroserialhelper,
@@ -54,7 +54,7 @@ class ParserServer(TestCase):
 
         parser_grpc.add_ParserMonitorServicer_to_server(
             initialize_parser(parser_grpc.ParserMonitorServicer)(
-                self.producer, self.schema, self.schema_client, self.logger.logger
+                self.producer, self.schema, self.schema, self.schema_client, self.logger.logger
             ),
             self.server,
             self.avroserialhelper,
@@ -326,7 +326,7 @@ class ParserServer(TestCase):
         and the monitors it with the MONITOR task.
         """
         cls = initialize_parser()(
-            self.producer, self.schema, self.schema_client, self.logger.logger
+            self.producer, self.schema, self.schema, self.schema_client, self.logger.logger
         )
         s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
