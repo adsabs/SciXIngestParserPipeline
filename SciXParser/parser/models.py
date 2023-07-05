@@ -17,9 +17,8 @@ class Status(enum.Enum):
 
 class Source(enum.Enum):
     ARXIV = 1
-    SYMBOL2 = 2
+    REPARSE = 2
     SYMBOL3 = 3
-    SYMBOL4 = 4
 
 
 class gRPC_status(Base):
@@ -37,10 +36,10 @@ class gRPC_status(Base):
     date_of_last_attempt = Column(DateTime)
 
 
-class PARSER_record(Base):
+class parser_record(Base):
     """
-    ArXiV records table
-    table containing the relevant information for harvested arxiv records.
+    Parser records table
+    table containing the relevant information for parsed records.
     """
 
     __tablename__ = "parser_records"

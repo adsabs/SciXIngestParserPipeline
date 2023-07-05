@@ -3,8 +3,8 @@ from datetime import datetime
 
 from SciXPipelineUtils import utils
 
-from parser import db
 from parser.metadata_parsers import parse_arxiv
+from SciXParser.parser import db
 
 
 def reparse_handler(app, job_request, producer):
@@ -16,9 +16,9 @@ def reparse_handler(app, job_request, producer):
     record_entry = db.get_parser_record(app, metadata_uuid)
 
     # If resend, only resend the data from the DB, do not initiate a parsing task.
-    if job_request.get("resend"):
+    if job_request.get("resend") and record_entry:
         producer_message = record_entry.parsed_record
-        producer_message["task"] = job_request.get("task")
+        producer_message["task"] = record_entry.source
         producer_message["record_id"] = metadata_uuid
         parser_output_schema = utils.get_schema(
             app, app.schema_client, app.config.get("PARSER_OUTPUT_SCHEMA")
@@ -42,14 +42,14 @@ def reparse_handler(app, job_request, producer):
 
         return status
 
-    s3_path = record_entry.s3_path
+    s3_path = record_entry.s3_key
     date = datetime.now()
 
     try:
         app.logger.info("Attempting to collect raw metadata from {} S3".format("AWS"))
-        metadata = app.s3clients["AWS"].read_s3_object(s3_path)
+        metadata = app.s3Clients["AWS"].read_s3_object(s3_path)
     except Exception:
-        db.collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
+        metadata = db.collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
 
     new_job_request = {
         "record_id": metadata_uuid,

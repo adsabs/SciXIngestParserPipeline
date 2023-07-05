@@ -43,6 +43,31 @@ class mock_job_request(object):
             }
 
 
+class mock_reparse_job_request(object):
+    def __init__(self, force=False, resend=False):
+        self.record_id = uuid.uuid4()
+        self.force = force
+        self.resend = resend
+
+    def value(self):
+        return {
+            "record_id": self.record_id,
+            "task": "REPARSE",
+            "force": self.force,
+            "resend": self.resend,
+        }
+
+
+class mock_reparse_db_entry(object):
+    def __init__(self, record_id, s3_key, record=None):
+        self.id = record_id
+        self.s3_key = s3_key
+        self.date_created = datetime(2023, 6, 1)
+        self.date_modifed = None
+        self.parsed_record = record
+        self.source = "ARXIV"
+
+
 class mock_avro_test(object):
     def value(self):
         with open("SciXParser/tests/stubdata/arxiv_parsed_data.json") as f:

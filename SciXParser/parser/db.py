@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging as logger
 
 import parser.models as models
@@ -14,9 +13,9 @@ def write_status_redis(redis_instance, status):
 
 def collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid):
     try:
-        for client in app.s3clients.keys():
+        for client in app.s3Clients.keys():
             app.logger.info("Attempting collect raw metadata from {} S3".format(client))
-            metadata = app.s3clients[client].read_s3_object(s3_path)
+            metadata = app.s3Clients[client].read_s3_object(s3_path)
             return metadata
     except Exception:
         app.logger.error(
@@ -24,9 +23,7 @@ def collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
         )
         status = "Error"
         write_status_redis(app.redis, status)
-        update_job_status(
-            app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
-        )
+        update_job_status(app, job_request.get("record_id"), status)
 
 
 def get_job_status_by_record_id(cls, record_ids, only_status=None):
@@ -165,11 +162,14 @@ def update_parser_record_metadata(cls, record_id, date, parsed_metadata):
     return updated
 
 
-def get_parser_record(session, record_id):
+def get_parser_record(cls, record_id):
     """
     Return record with UUID: record_id
     """
-    record_db = (
-        session.query(models.PARSER_record).filter(models.PARSER_record.id == record_id).first()
-    )
+    with cls.session_scope() as session:
+        record_db = (
+            session.query(models.parser_record)
+            .filter(models.parser_record.id == record_id)
+            .first()
+        )
     return record_db
