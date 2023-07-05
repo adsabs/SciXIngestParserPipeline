@@ -5,14 +5,16 @@ from unittest import TestCase
 class mock_gRPC_avro_msg:
     def value(self):
         return {
-            "record_id": "g425897fh3qp35890u54256342ewferht242546",
+            "record_id": "206f479f-bb1e-49ff-96df-491d66769abc",
             "task": "REPARSE",
             "status": None,
             "persistence": None,
+            "force": None,
+            "resend": None,
         }
 
     def bitstream(self):
-        return b"\x00Ng425897fh3qp35890u54256342ewferht242546\x00\x00\x00"
+        return b"\x00H206f479f-bb1e-49ff-96df-491d66769abc\x00\x00\x00\x00\x00"
 
 
 class base_utils(TestCase):

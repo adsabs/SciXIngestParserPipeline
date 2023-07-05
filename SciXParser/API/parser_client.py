@@ -37,6 +37,20 @@ def input_parser(cli_args):
         type=str,
         help="The UUID of the record to be reparsed.",
     )
+    process_parser.add_argument(
+        "--force",
+        action="store_true",
+        dest="force",
+        default=False,
+        help="Resend reparsed record to topic even if nothing has changed.",
+    )
+    process_parser.add_argument(
+        "--resend-only",
+        action="store_true",
+        dest="resend",
+        default=False,
+        help="Resend the current version of the parsed record as it exists in the DB.",
+    )
 
     process_parser = subparsers.add_parser("VIEW", help="Initialize a job with given inputs")
     process_parser.add_argument(
@@ -74,6 +88,10 @@ def output_message(args):
     s["persistence"] = args.persistence
     s["task"] = args.action
     s["record_id"] = args.uuid
+
+    if s["task"] == "REPARSE":
+        s["force"] = args.force
+        s["resend"] = args.resend
     return s
 
 

@@ -45,6 +45,18 @@
 			"type": ["null", "boolean"],
 			"doc": "Dictates whether connection is persistent.",
 			"default": null
+		},
+		{
+			"name": "resend",
+			"type": ["null", "boolean"],
+			"doc": "When true, only resend current DB record do not reparse.",
+			"default": null
+		},
+		{
+			"name": "force",
+			"type": ["null", "boolean"],
+			"doc": "When true, resend even if the parsed record has not changed.",
+			"default": null
 		}
 	]
 }
