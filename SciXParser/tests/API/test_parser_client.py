@@ -28,11 +28,7 @@ class TestParserClient(TestCase):
             get_schema(logger, schema_client, "FakeSchema")
 
     def test_input_parser(self):
-        input_args = [
-            "MONITOR",
-            "--uuid",
-            "'c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da'",
-        ]
+        input_args = ["MONITOR", "--uuid", "206f479f-bb1e-49ff-96df-491d66769abc"]
         args = input_parser(input_args)
         self.assertEqual(args.action, input_args[0])
         self.assertEqual(args.uuid, input_args[2])
@@ -43,13 +39,29 @@ class TestParserClient(TestCase):
         input_args = [
             "REPARSE",
             "--uuid",
-            "'c98b5b0f5e4dce3197a4a9a26d124d036f293a9a90a18361f475e4f08c19f2da'",
+            "206f479f-bb1e-49ff-96df-491d66769abc",
             "--persistence",
+            "--force",
         ]
         args = input_parser(input_args)
         self.assertEqual(args.action, input_args[0])
         self.assertEqual(args.uuid, input_args[2])
         self.assertEqual(args.persistence, True)
+        self.assertEqual(args.force, True)
 
         s = output_message(args)
         self.assertEqual(s["task"], "REPARSE")
+
+        input_args = [
+            "REPARSE",
+            "--uuid",
+            "206f479f-bb1e-49ff-96df-491d66769abc",
+            "--persistence",
+            "--resend-only",
+        ]
+        args = input_parser(input_args)
+        self.assertEqual(args.action, input_args[0])
+        self.assertEqual(args.uuid, input_args[2])
+        self.assertEqual(args.persistence, True)
+        self.assertEqual(args.resend, True)
+        self.assertEqual(args.force, False)
