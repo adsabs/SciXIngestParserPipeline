@@ -13,6 +13,7 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
     s3_key = job_request.get("s3_path")
     task = job_request.get("task")
     metadata = job_request.get("record_xml")
+    force = job_request.get("force", False)
     date = datetime.now()
     arxiv_parser = ArxivParser()
     parser_output_schema = utils.get_schema(
@@ -25,7 +26,11 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
 
         if reparse:
             app.logger.debug("{}".format(parsed_record))
+            old_record = db.get_parser_record(app, record_id)
             record_status = db.update_parser_record_metadata(app, record_id, date, parsed_record)
+            if old_record.parsed_record == parsed_record and force is not True:
+                record_status = False
+
         else:
             record_status = db.write_parser_record(
                 app, record_id, date, s3_key, parsed_record, task

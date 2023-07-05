@@ -135,6 +135,9 @@ async def run() -> None:
                 )
 
         elif s["task"] == "REPARSE":
+            if s["force"] and s["resend"]:
+                msg = "Cannot specify --resend-only and --force flags together. Stopping."
+                raise msg
             try:
                 stub = parser_grpc.ParserInitStub(channel, avroserialhelper)
                 async for response in stub.initParser(s):

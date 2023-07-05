@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 
+from SciXPipelineUtils import utils
+
 from parser import db
 from parser.metadata_parsers import parse_arxiv
 
@@ -9,8 +11,37 @@ def reparse_handler(app, job_request, producer):
     """
     Collects S3 information and prepares a compatible request for the task_selector
     """
+
     metadata_uuid = job_request.get("record_id")
-    record_entry = db.get_parser_record(metadata_uuid)
+    record_entry = db.get_parser_record(app, metadata_uuid)
+
+    # If resend, only resend the data from the DB, do not initiate a parsing task.
+    if job_request.get("resend"):
+        producer_message = record_entry.parsed_record
+        producer_message["task"] = job_request.get("task")
+        producer_message["record_id"] = metadata_uuid
+        parser_output_schema = utils.get_schema(
+            app, app.schema_client, app.config.get("PARSER_OUTPUT_SCHEMA")
+        )
+
+        try:
+            producer.produce(
+                topic=app.config.get("PARSER_OUTPUT_TOPIC"),
+                value=producer_message,
+                value_schema=parser_output_schema,
+            )
+            status = "Success"
+
+        except Exception:
+            app.logger.exception(
+                "Failed to produce {} to Kafka topic: {}".format(
+                    metadata_uuid, app.config.get("PARSER_OUTPUT_TOPIC")
+                )
+            )
+            status = "Error"
+
+        return status
+
     s3_path = record_entry.s3_path
     date = datetime.now()
 

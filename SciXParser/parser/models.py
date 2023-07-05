@@ -43,7 +43,7 @@ class PARSER_record(Base):
     table containing the relevant information for harvested arxiv records.
     """
 
-    __tablename__ = "PARSER_records"
+    __tablename__ = "parser_records"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     s3_key = Column(String)
     date_created = Column(DateTime)
