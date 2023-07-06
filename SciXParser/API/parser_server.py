@@ -187,7 +187,9 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
             self.logger.info("Serving viewParser request %s", request)
             self.logger.info(json.dumps(request.get("task_args")))
             record_id = request["record_id"]
-            record = db.get_parser_record(self, record_id).parsed_data
+            record = {}
+            record["parsed_record"] = db.get_parser_record(self, record_id).parsed_record
+            record["record_id"] = record_id
             yield record
 
         def monitorParser(self, request, context: grpc.aio.ServicerContext):

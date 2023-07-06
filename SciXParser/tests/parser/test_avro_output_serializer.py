@@ -14,6 +14,7 @@ class TestAvroOutputSerializer(TestCase):
         msg = mock_avro_test().value()
         serializer = avro_serializer.AvroSerialHelper(json.dumps(schema_json))
         bitstream = serializer.avro_serializer(msg)
+        print(bitstream)
         self.assertEqual(bitstream, mock_avro_test().bitstream())
 
     def test_avro_deserialization(self):

@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 from concurrent import futures
@@ -30,13 +31,25 @@ class ParserServer(TestCase):
         self.logger = Logging(logging)
         self.schema_client = MockSchemaRegistryClient()
         self.VALUE_SCHEMA_FILE = "SciXParser/tests/stubdata/AVRO_schemas/ParserInputSchema.avsc"
+        self.VALUE_SCHEMA_FILE_2 = "SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc"
         self.VALUE_SCHEMA_NAME = "ParserInputSchema"
+        self.VALUE_SCHEMA_NAME_2 = "ParserOutputSchema"
         self.value_schema = open(self.VALUE_SCHEMA_FILE).read()
+        self.value_schema_2 = open(self.VALUE_SCHEMA_FILE_2).read()
 
         self.schema_client.register(self.VALUE_SCHEMA_NAME, Schema(self.value_schema, "AVRO"))
-        self.schema = get_schema(self.logger, self.schema_client, self.VALUE_SCHEMA_NAME)
-        self.avroserialhelper = AvroSerialHelper(ser_schema=self.schema, logger=self.logger.logger)
-
+        self.ser_schema = get_schema(self.logger, self.schema_client, self.VALUE_SCHEMA_NAME)
+        self.schema_client.register(self.VALUE_SCHEMA_NAME_2, Schema(self.value_schema_2, "AVRO"))
+        self.des_schema = get_schema(self.logger, self.schema_client, self.VALUE_SCHEMA_NAME_2)
+        self.avroserialhelper = AvroSerialHelper(
+            ser_schema=self.ser_schema, logger=self.logger.logger
+        )
+        self.monavroserialhelper = AvroSerialHelper(
+            ser_schema=self.des_schema, des_schema=self.ser_schema, logger=self.logger.logger
+        )
+        self.monclientavroserialhelper = AvroSerialHelper(
+            ser_schema=self.ser_schema, des_schema=self.des_schema, logger=self.logger.logger
+        )
         OUTPUT_VALUE_SCHEMA_FILE = "SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc"
         OUTPUT_VALUE_SCHEMA_NAME = "ParserOutputSchema"
         output_value_schema = open(OUTPUT_VALUE_SCHEMA_FILE).read()
@@ -46,15 +59,23 @@ class ParserServer(TestCase):
 
         parser_grpc.add_ParserInitServicer_to_server(
             initialize_parser()(
-                self.producer, self.schema, self.schema_client, self.logger.logger
+                self.producer, self.ser_schema, self.schema_client, self.logger.logger
             ),
             self.server,
             self.avroserialhelper,
         )
 
+        parser_grpc.add_ParserViewServicer_to_server(
+            initialize_parser(parser_grpc.ParserViewServicer)(
+                self.producer, self.ser_schema, self.schema_client, self.logger.logger
+            ),
+            self.server,
+            self.monavroserialhelper,
+        )
+
         parser_grpc.add_ParserMonitorServicer_to_server(
             initialize_parser(parser_grpc.ParserMonitorServicer)(
-                self.producer, self.schema, self.schema_client, self.logger.logger
+                self.producer, self.ser_schema, self.schema_client, self.logger.logger
             ),
             self.server,
             self.avroserialhelper,
@@ -326,7 +347,7 @@ class ParserServer(TestCase):
         and the monitors it with the MONITOR task.
         """
         cls = initialize_parser()(
-            self.producer, self.schema, self.schema_client, self.logger.logger
+            self.producer, self.ser_schema, self.schema_client, self.logger.logger
         )
         s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
@@ -353,3 +374,31 @@ class ParserServer(TestCase):
             for response in list(responses):
                 self.assertEqual(response.get("status"), "Processing")
                 self.assertEqual(response.get("record_id"), s.get("record_id"))
+
+    def test_Parser_server_view(self):
+        """
+        A test of the MONITOR method for the gRPC server
+        input:
+            s: AVRO message: ParserInputSchema
+        """
+        s = {"task": "VIEW", "record_id": str(uuid.uuid4())}
+        with open("SciXParser/tests/stubdata/arxiv_parsed_data.json", "r") as f:
+            parsed_record = json.load(f)
+        with grpc.insecure_channel(f"localhost:{self.port}") as channel:
+            with base.base_utils.mock_multiple_targets(
+                {
+                    "get_parser_record": patch.object(
+                        db,
+                        "get_parser_record",
+                        return_value=base.mock_reparse_db_entry(
+                            str(s.get("record_id")),
+                            "/{}".format(s.get("record_id")),
+                            parsed_record,
+                        ),
+                    ),
+                }
+            ):
+                stub = parser_grpc.ParserViewStub(channel, self.monclientavroserialhelper)
+                responses = stub.viewParser(s)
+                for response in list(responses):
+                    self.assertEqual(response.get("record_id"), s.get("record_id"))
