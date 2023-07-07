@@ -15,7 +15,7 @@ def collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
     try:
         for client in app.s3Clients.keys():
             app.logger.info("Attempting collect raw metadata from {} S3".format(client))
-            metadata = app.s3Clients[client].read_s3_object(s3_path)
+            metadata = app.s3Clients[client].read_object_s3(s3_path)
             return metadata
     except Exception:
         app.logger.error(
