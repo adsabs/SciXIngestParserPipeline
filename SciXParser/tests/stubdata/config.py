@@ -28,5 +28,5 @@ AWS_BUCKET_ARN = "BUCKETARN"
 # MINIO Configuration
 MINIO_ACCESS_KEY_ID = "admin"
 MINIO_SECRET_ACCESS_KEY = "supersecret"
-MINIO_BUCKET_NAME = "scix-parser"
-MINIO_S3_URL = "http://minio:9000"
+MINIO_BUCKET_NAME = "MINIOBUCKETNAME"
+MINIO_S3_URL = "https://test.bucket.domain"

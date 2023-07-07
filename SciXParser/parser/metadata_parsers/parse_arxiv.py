@@ -4,7 +4,7 @@ from datetime import datetime
 from adsingestp.parsers.arxiv import ArxivParser
 from SciXPipelineUtils import utils
 
-from parser import db
+from SciXParser.parser import db
 
 
 def parse_store_arxiv_record(app, job_request, producer, reparse=False):
@@ -27,10 +27,18 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
         if reparse:
             app.logger.debug("{}".format(parsed_record))
             old_record = db.get_parser_record(app, record_id)
-            record_status = db.update_parser_record_metadata(app, record_id, date, parsed_record)
-            if old_record.parsed_record == parsed_record and force is not True:
-                record_status = False
+            old_record.parsed_record["recordData"].pop("parsedTime")
+            test_record = parsed_record
+            test_record["recordData"].pop("parsedTime")
 
+            if old_record.parsed_record == test_record and force is not True:
+                record_status = False
+                status = "Unchanged"
+            else:
+                with app.session_scope() as session:
+                    record_status = db.update_parser_record_metadata(
+                        session, record_id, date, parsed_record
+                    )
         else:
             record_status = db.write_parser_record(
                 app, record_id, date, s3_key, parsed_record, task

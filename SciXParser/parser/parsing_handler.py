@@ -45,11 +45,8 @@ def reparse_handler(app, job_request, producer):
     s3_path = record_entry.s3_key
     date = datetime.now()
 
-    try:
-        app.logger.info("Attempting to collect raw metadata from {} S3".format("AWS"))
-        metadata = app.s3Clients["AWS"].read_object_s3(s3_path)
-    except Exception:
-        metadata = db.collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
+    app.logger.info("Attempting to collect raw metadata from {} S3".format("AWS"))
+    metadata = db.collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid)
 
     new_job_request = {
         "record_id": metadata_uuid,
