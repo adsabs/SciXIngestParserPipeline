@@ -71,7 +71,7 @@ def parse_task_selector(app, job_request, producer, reparse=False):
     else:
         app.logger.error("{} is not a valid data source. Stopping.".format(task))
         status = "Error"
-        db.write_status_redis(app.redis, status)
-        db.update_job_status(
-            app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
+        db.write_status_redis(
+            app.redis, json.dumps({"job_id": str(job_request.get("record_id")), "status": status})
         )
+        db.update_job_status(app, job_request["record_id"], status)

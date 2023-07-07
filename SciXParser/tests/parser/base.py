@@ -28,8 +28,9 @@ class base_utils(TestCase):
 
 
 class mock_job_request(object):
-    def __init__(self):
+    def __init__(self, source="ARXIV"):
         self.record_id = uuid.uuid4()
+        self.source = source
 
     def value(self):
         with open("SciXParser/tests/stubdata/arxiv_raw_xml_data.xml", "r") as f:
@@ -38,7 +39,7 @@ class mock_job_request(object):
                 "record_id": self.record_id,
                 "record_xml": record_metadata,
                 "s3_path": "/{}".format(self.record_id),
-                "task": "ARXIV",
+                "task": self.source,
                 "datetime": datetime.now(),
             }
 

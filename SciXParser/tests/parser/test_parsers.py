@@ -37,6 +37,27 @@ class TestParser(TestCase):
                 producer = AvroProducer({}, schema_registry=mock_app.schema_client)
                 mock_app.parser_task(mock_job_request(), producer)
 
+    def test_parser_task_bad_source(self):
+        mock_job_request = base.mock_job_request
+        url = "https://test.bucket.domain"
+        with open("SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc") as f:
+            schema_str = f.read()
+        with patch.dict(os.environ, {"MOTO_S3_CUSTOM_ENDPOINTS": url}):
+            with moto.mock_s3() and base.base_utils.mock_multiple_targets(
+                {
+                    "get_schema": patch.object(
+                        utils,
+                        "get_schema",
+                        return_value=schema_str,
+                    )
+                }
+            ):
+                mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
+                mock_app.schema_client = MockSchemaRegistryClient()
+                mock_app._init_logger()
+                producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+                mock_app.parser_task(mock_job_request(source="trash"), producer)
+
     @moto.mock_s3
     def test_reparse_task_alternate_s3(self):
         with open("SciXParser/tests/stubdata/arxiv_raw_xml_data.xml", "rb") as f:
