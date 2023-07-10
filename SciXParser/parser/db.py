@@ -140,7 +140,7 @@ def write_parser_record(cls, record_id, date, s3_key, parsed_metadata, source):
     return success
 
 
-def update_parser_record_metadata(session, record_id, date, parsed_metadata):
+def update_parser_record_metadata(session, record_id, date, parsed_metadata, logger):
     """
     Write harvested record to db.
     """
@@ -155,11 +155,11 @@ def update_parser_record_metadata(session, record_id, date, parsed_metadata):
             parser_record.date_created = record_db.date_created
             parser_record.date_modified = date
             parser_record.source = record_db.source
-            session.merge(record_db)
+            session.merge(parser_record)
             session.commit()
             updated = True
     except Exception as e:
-        session.logger.exception("Failed to write record {}.".format(record_id))
+        logger.exception("Failed to write record {}.".format(record_id))
         raise e
 
     return updated
