@@ -26,12 +26,13 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
 
         if reparse:
             app.logger.debug("{}".format(parsed_record))
-            old_record = db.get_parser_record(app, record_id)
-            old_record.parsed_record["recordData"].pop("parsedTime")
+            with app.session_scope() as session:
+                old_record = db.get_parser_record(session, record_id).parsed_data
+            old_record["recordData"].pop("parsedTime")
             test_record = parsed_record
             test_record["recordData"].pop("parsedTime")
 
-            if old_record.parsed_record == test_record and force is not True:
+            if old_record == test_record and force is not True:
                 record_status = False
                 status = "Unchanged"
             else:

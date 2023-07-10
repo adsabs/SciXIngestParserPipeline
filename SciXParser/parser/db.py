@@ -155,7 +155,7 @@ def update_parser_record_metadata(session, record_id, date, parsed_metadata):
             parser_record.date_created = record_db.date_created
             parser_record.date_modified = date
             parser_record.source = record_db.source
-            session.add(parser_record)
+            session.merge(record_db)
             session.commit()
             updated = True
     except Exception as e:

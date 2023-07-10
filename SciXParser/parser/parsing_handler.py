@@ -57,6 +57,7 @@ def reparse_handler(app, job_request, producer):
         "s3_path": s3_path,
         "task": record_source,
         "datetime": date,
+        "force": job_request.get("force"),
     }
 
     return parse_task_selector(app, new_job_request, producer, reparse=True)
