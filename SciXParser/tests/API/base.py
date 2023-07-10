@@ -1,23 +1,31 @@
 import contextlib
+from datetime import datetime
 from unittest import TestCase
 
 
 class mock_gRPC_avro_msg:
     def value(self):
         return {
-            "record_id": "g425897fh3qp35890u54256342ewferht242546",
-            "task": "SYMBOL1",
+            "record_id": "206f479f-bb1e-49ff-96df-491d66769abc",
+            "task": "REPARSE",
             "status": None,
-            "task_args": {
-                "ingest": None,
-                "ingest_type": "metadata",
-                "daterange": "2023-03-07",
-                "persistence": None,
-            },
+            "persistence": None,
+            "force": None,
+            "resend": None,
         }
 
     def bitstream(self):
-        return b"\x00Ng425897fh3qp35890u54256342ewferht242546\x02\x00\x00\x02\x10metadata\x02\x142023-03-07\x02"
+        return b"\x00H206f479f-bb1e-49ff-96df-491d66769abc\x00\x00\x00\x00\x00"
+
+
+class mock_reparse_db_entry(object):
+    def __init__(self, record_id, s3_key, record=None):
+        self.id = record_id
+        self.s3_key = s3_key
+        self.date_created = datetime(2023, 6, 1)
+        self.date_modifed = None
+        self.parsed_record = record
+        self.source = "ARXIV"
 
 
 class base_utils(TestCase):

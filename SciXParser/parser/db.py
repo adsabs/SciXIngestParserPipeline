@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging as logger
 
 import parser.models as models
@@ -13,20 +12,22 @@ def write_status_redis(redis_instance, status):
 
 
 def collect_metadata_from_secondary_s3(app, s3_path, job_request, metadata_uuid):
-    try:
-        for client in app.s3clients.keys():
+    metadata = None
+    for client in app.s3Clients.keys():
+        try:
             app.logger.info("Attempting collect raw metadata from {} S3".format(client))
-            metadata = app.s3clients[client].read_s3_object(s3_path)
+            metadata = app.s3Clients[client].read_object_s3(s3_path)
             return metadata
-    except Exception:
-        app.logger.error(
-            "Unable to find a valid s3 object for {}. Stopping.".format(metadata_uuid)
-        )
-        status = "Error"
-        write_status_redis(app.redis, status)
-        update_job_status(
-            app, json.dumps({"job_id": job_request.get("record_id"), "status": status})
-        )
+        except Exception:
+            app.logger.error(f"Unable to load s3 object for {metadata_uuid} from client {client}.")
+
+    app.logger.error("Unable to find a valid s3 object for {}. Stopping.".format(metadata_uuid))
+    status = "Error"
+    write_status_redis(app.redis, status)
+    update_job_status(app, job_request.get("record_id"), status)
+
+    msg = "Unable to find a valid s3 object for {}. Stopping.".format(metadata_uuid)
+    raise ValueError(msg)
 
 
 def get_job_status_by_record_id(cls, record_ids, only_status=None):
@@ -122,14 +123,14 @@ def write_parser_record(cls, record_id, date, s3_key, parsed_metadata, source):
     success = False
     with cls.session_scope() as session:
         try:
-            PARSER_record = models.PARSER_record()
-            PARSER_record.id = record_id
-            PARSER_record.s3_key = s3_key
-            PARSER_record.parsed_data = parsed_metadata
-            PARSER_record.date_created = date
-            PARSER_record.date_modified = date
-            PARSER_record.source = source
-            session.add(PARSER_record)
+            parser_record = models.parser_record()
+            parser_record.id = record_id
+            parser_record.s3_key = s3_key
+            parser_record.parsed_data = parsed_metadata
+            parser_record.date_created = date
+            parser_record.date_modified = date
+            parser_record.source = source
+            session.add(parser_record)
             session.commit()
             success = True
 
@@ -139,28 +140,27 @@ def write_parser_record(cls, record_id, date, s3_key, parsed_metadata, source):
     return success
 
 
-def update_parser_record_metadata(cls, record_id, date, parsed_metadata):
+def update_parser_record_metadata(session, record_id, date, parsed_metadata, logger):
     """
     Write harvested record to db.
     """
     updated = False
-    with cls.session_scope() as session:
-        try:
-            record_db = get_parser_record(session, record_id)
-            if record_db:
-                PARSER_record = models.PARSER_record()
-                PARSER_record.id = record_db.record_id
-                PARSER_record.s3_key = record_db.s3_key
-                PARSER_record.parsed_data = parsed_metadata
-                PARSER_record.date_created = record_db.date_created
-                PARSER_record.date_modified = date
-                PARSER_record.source = record_db.source
-                session.add(PARSER_record)
-                session.commit()
-                updated = True
-        except Exception as e:
-            cls.logger.exception("Failed to write record {}.".format(record_id))
-            raise e
+    record_db = get_parser_record(session, record_id)
+    try:
+        if record_db:
+            parser_record = models.parser_record()
+            parser_record.id = record_db.id
+            parser_record.s3_key = record_db.s3_key
+            parser_record.parsed_data = parsed_metadata
+            parser_record.date_created = record_db.date_created
+            parser_record.date_modified = date
+            parser_record.source = record_db.source
+            session.merge(parser_record)
+            session.commit()
+            updated = True
+    except Exception as e:
+        logger.exception("Failed to write record {}.".format(record_id))
+        raise e
 
     return updated
 
@@ -170,6 +170,6 @@ def get_parser_record(session, record_id):
     Return record with UUID: record_id
     """
     record_db = (
-        session.query(models.PARSER_record).filter(models.PARSER_record.id == record_id).first()
+        session.query(models.parser_record).filter(models.parser_record.id == record_id).first()
     )
     return record_db

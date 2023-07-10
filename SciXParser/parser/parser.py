@@ -33,12 +33,13 @@ def init_pipeline(proj_home, consumer_topic_name=None, consumer_schema_name=None
         consumer_topic_name = app.config.get("PARSER_INPUT_TOPIC")
     app.schema_client = SchemaRegistryClient({"url": app.config.get("SCHEMA_REGISTRY_URL")})
     schema = utils.get_schema(app, app.schema_client, consumer_schema_name)
+    app.logger.info("Generating New Consumer on topic: {}".format(consumer_topic_name))
     consumer = AvroConsumer(
         {
             "bootstrap.servers": app.config.get("KAFKA_BROKER"),
             "schema.registry.url": app.config.get("SCHEMA_REGISTRY_URL"),
             "auto.offset.reset": "latest",
-            "group.id": "ParserPipeline1",
+            "group.id": "ParserPipeline" + str(consumer_schema_name),
         },
         reader_value_schema=schema,
     )

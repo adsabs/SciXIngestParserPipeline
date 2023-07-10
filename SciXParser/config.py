@@ -16,6 +16,8 @@ PARSER_INPUT_SCHEMA = "ParserInputSchema"
 PARSER_INPUT_TOPIC = "ParserInput"
 PARSER_OUTPUT_SCHEMA = "ParserOutputSchema"
 PARSER_OUTPUT_TOPIC = "ParserOutput"
+HARVESTER_OUTPUT_SCHEMA = "HarvesterOutputSchema"
+HARVESTER_OUTPUT_TOPIC = "HarvesterOutput"
 # S3 Configuration
 S3_PROVIDERS = ["AWS", "MINIO"]
 # AWS Configuration
