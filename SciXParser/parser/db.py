@@ -165,14 +165,11 @@ def update_parser_record_metadata(session, record_id, date, parsed_metadata):
     return updated
 
 
-def get_parser_record(cls, record_id):
+def get_parser_record(session, record_id):
     """
     Return record with UUID: record_id
     """
-    with cls.session_scope() as session:
-        record_db = (
-            session.query(models.parser_record)
-            .filter(models.parser_record.id == record_id)
-            .first()
-        )
+    record_db = (
+        session.query(models.parser_record).filter(models.parser_record.id == record_id).first()
+    )
     return record_db

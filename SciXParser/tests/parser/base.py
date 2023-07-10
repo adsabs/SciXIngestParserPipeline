@@ -65,7 +65,7 @@ class mock_reparse_db_entry(object):
         self.s3_key = s3_key
         self.date_created = datetime(2023, 6, 1)
         self.date_modifed = None
-        self.parsed_record = record
+        self.parsed_data = record
         self.source = "ARXIV"
 
 

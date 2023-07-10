@@ -13,13 +13,17 @@ def reparse_handler(app, job_request, producer):
     """
 
     metadata_uuid = job_request.get("record_id")
-    record_entry = db.get_parser_record(app, metadata_uuid)
+    with app.session_scope() as session:
+        record_entry = db.get_parser_record(session, metadata_uuid)
+        producer_message = record_entry.parsed_data
+        record_source = record_entry.source
+        if producer_message:
+            producer_message["task"] = record_source
+            producer_message["record_id"] = metadata_uuid
+        s3_path = record_entry.s3_key
 
     # If resend, only resend the data from the DB, do not initiate a parsing task.
-    if job_request.get("resend") and record_entry:
-        producer_message = record_entry.parsed_record
-        producer_message["task"] = record_entry.source
-        producer_message["record_id"] = metadata_uuid
+    if job_request.get("resend") and producer_message:
         parser_output_schema = utils.get_schema(
             app, app.schema_client, app.config.get("PARSER_OUTPUT_SCHEMA")
         )
@@ -42,7 +46,6 @@ def reparse_handler(app, job_request, producer):
 
         return status
 
-    s3_path = record_entry.s3_key
     date = datetime.now()
 
     app.logger.info("Attempting to collect raw metadata from {} S3".format("AWS"))
@@ -52,7 +55,7 @@ def reparse_handler(app, job_request, producer):
         "record_id": metadata_uuid,
         "record_xml": metadata,
         "s3_path": s3_path,
-        "task": record_entry.source,
+        "task": record_source,
         "datetime": date,
     }
 

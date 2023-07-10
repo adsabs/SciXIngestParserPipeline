@@ -17,7 +17,7 @@ from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
 class TestParser(TestCase):
     def test_parser_task(self):
-        mock_job_request = base.mock_job_request
+        mock_job_request = base.mock_job_request()
         url = "https://test.bucket.domain"
         with open("SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc") as f:
             schema_str = f.read()
@@ -35,7 +35,7 @@ class TestParser(TestCase):
                 mock_app.schema_client = MockSchemaRegistryClient()
                 mock_app._init_logger()
                 producer = AvroProducer({}, schema_registry=mock_app.schema_client)
-                mock_app.parser_task(mock_job_request(), producer)
+                mock_app.parser_task(mock_job_request, producer)
 
     def test_parser_task_bad_source(self):
         mock_job_request = base.mock_job_request
@@ -86,27 +86,30 @@ class TestParser(TestCase):
                     buckets[producer].write_object_s3(
                         file_bytes=file_bytes, object_name=object_name
                     )
-
                 with base.base_utils.mock_multiple_targets(
                     {
                         "get_schema": patch.object(
                             utils,
                             "get_schema",
                             return_value=schema_str,
-                        ),
-                        "get_parser_record": patch.object(
-                            db,
-                            "get_parser_record",
-                            return_value=base.mock_reparse_db_entry(
-                                str(mock_job_request.record_id),
-                                "/{}".format(mock_job_request.record_id),
-                            ),
-                        ),
+                        )
                     }
                 ):
+                    return_value = base.mock_reparse_db_entry(
+                        str(mock_job_request.record_id),
+                        "/{}".format(mock_job_request.record_id),
+                    )
                     mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
                     mock_app.schema_client = MockSchemaRegistryClient()
                     mock_app._init_logger()
+                    db.write_parser_record(
+                        mock_app,
+                        return_value.id,
+                        return_value.date_created,
+                        return_value.s3_key,
+                        return_value.parsed_data,
+                        return_value.source,
+                    )
                     producer = AvroProducer({}, schema_registry=mock_app.schema_client)
                     mock_app.parser_task(mock_job_request, producer)
 
@@ -173,20 +176,24 @@ class TestParser(TestCase):
                     "get_schema",
                     return_value=schema_str,
                 ),
-                "get_parser_record": patch.object(
-                    db,
-                    "get_parser_record",
-                    return_value=base.mock_reparse_db_entry(
-                        str(mock_job_request.record_id),
-                        "/{}".format(mock_job_request.record_id),
-                    ),
-                ),
             }
         ):
+            return_value = base.mock_reparse_db_entry(
+                str(mock_job_request.record_id),
+                "/{}".format(mock_job_request.record_id),
+            )
             mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
             mock_app.schema_client = MockSchemaRegistryClient()
             mock_app._init_logger()
             producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+            db.write_parser_record(
+                mock_app,
+                return_value.id,
+                return_value.date_created,
+                return_value.s3_key,
+                return_value.parsed_data,
+                return_value.source,
+            )
             mock_app.parser_task(mock_job_request, producer)
         moto_fake.stop()
 
