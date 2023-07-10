@@ -23,5 +23,4 @@ class TestRedisReadWrite(TestCase):
         )
         write_status_redis(redis_instance, redis_status)
         status = next(listener.get_status_redis(job_id, logger.logger))
-        print(status)
         self.assertEqual(status, status)

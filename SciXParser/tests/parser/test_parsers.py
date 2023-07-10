@@ -130,21 +130,24 @@ class TestParser(TestCase):
                             "get_schema",
                             return_value=schema_str,
                         ),
-                        "get_parser_record": patch.object(
-                            db,
-                            "get_parser_record",
-                            return_value=base.mock_reparse_db_entry(
-                                str(mock_job_request.record_id),
-                                "/{}".format(mock_job_request.record_id),
-                            ),
-                        ),
                     }
                 ):
                     mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
                     mock_app.schema_client = MockSchemaRegistryClient()
                     mock_app._init_logger()
                     producer = AvroProducer({}, schema_registry=mock_app.schema_client)
-
+                    return_value = base.mock_reparse_db_entry(
+                        str(mock_job_request.record_id),
+                        "/{}".format(mock_job_request.record_id),
+                    )
+                    db.write_parser_record(
+                        mock_app,
+                        return_value.id,
+                        return_value.date_created,
+                        return_value.s3_key,
+                        return_value.parsed_data,
+                        return_value.source,
+                    )
                     with pytest.raises(ValueError):
                         mock_app.parser_task(mock_job_request, producer)
 
@@ -227,21 +230,25 @@ class TestParser(TestCase):
                     "get_schema",
                     return_value=schema_str,
                 ),
-                "get_parser_record": patch.object(
-                    db,
-                    "get_parser_record",
-                    return_value=base.mock_reparse_db_entry(
-                        str(mock_job_request.record_id),
-                        "/{}".format(mock_job_request.record_id),
-                        parsed_record,
-                    ),
-                ),
             }
         ):
+            return_value = base.mock_reparse_db_entry(
+                str(mock_job_request.record_id),
+                "/{}".format(mock_job_request.record_id),
+                parsed_record,
+            )
             mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
             mock_app.schema_client = MockSchemaRegistryClient()
             mock_app._init_logger()
             producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+            db.write_parser_record(
+                mock_app,
+                return_value.id,
+                return_value.date_created,
+                return_value.s3_key,
+                return_value.parsed_data,
+                return_value.source,
+            )
             mock_app.parser_task(mock_job_request, producer)
         moto_fake.stop()
 
@@ -277,21 +284,25 @@ class TestParser(TestCase):
                     "get_schema",
                     return_value=schema_str,
                 ),
-                "get_parser_record": patch.object(
-                    db,
-                    "get_parser_record",
-                    return_value=base.mock_reparse_db_entry(
-                        str(mock_job_request.record_id),
-                        "/{}".format(mock_job_request.record_id),
-                        parsed_record,
-                    ),
-                ),
             }
         ):
+            return_value = base.mock_reparse_db_entry(
+                str(mock_job_request.record_id),
+                "/{}".format(mock_job_request.record_id),
+                parsed_record,
+            )
             mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
             mock_app.schema_client = MockSchemaRegistryClient()
             mock_app._init_logger()
             producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+            db.write_parser_record(
+                mock_app,
+                return_value.id,
+                return_value.date_created,
+                return_value.s3_key,
+                return_value.parsed_data,
+                return_value.source,
+            )
             mock_app.parser_task(mock_job_request, producer)
         moto_fake.stop()
 
@@ -308,20 +319,24 @@ class TestParser(TestCase):
                     utils,
                     "get_schema",
                     return_value=schema_str,
-                ),
-                "get_parser_record": patch.object(
-                    db,
-                    "get_parser_record",
-                    return_value=base.mock_reparse_db_entry(
-                        str(mock_job_request.record_id),
-                        "/{}".format(mock_job_request.record_id),
-                        parsed_record,
-                    ),
-                ),
+                )
             }
         ):
+            return_value = base.mock_reparse_db_entry(
+                str(mock_job_request.record_id),
+                "/{}".format(mock_job_request.record_id),
+                parsed_record,
+            )
             mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
             mock_app.schema_client = MockSchemaRegistryClient()
             mock_app._init_logger()
             producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+            db.write_parser_record(
+                mock_app,
+                return_value.id,
+                return_value.date_created,
+                return_value.s3_key,
+                return_value.parsed_data,
+                return_value.source,
+            )
             mock_app.parser_task(mock_job_request, producer)

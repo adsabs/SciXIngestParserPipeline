@@ -16,7 +16,7 @@ def reparse_handler(app, job_request, producer):
     with app.session_scope() as session:
         record_entry = db.get_parser_record(session, metadata_uuid)
         producer_message = record_entry.parsed_data
-        record_source = record_entry.source
+        record_source = record_entry.source.name
         if producer_message:
             producer_message["task"] = record_source
             producer_message["record_id"] = metadata_uuid
@@ -68,7 +68,6 @@ def parse_task_selector(app, job_request, producer, reparse=False):
     """
     task = job_request.get("task")
     if task == "ARXIV":
-        print("Record is arxiv")
         parse_arxiv.parse_store_arxiv_record(app, job_request, producer, reparse=reparse)
 
     else:
