@@ -14,7 +14,7 @@ from SciXPipelineUtils.avro_serializer import AvroSerialHelper
 from API.grpc_modules import parser_grpc
 from API.parser_client import get_schema
 from API.parser_server import Listener, Logging, initialize_parser
-from parser import db
+from SciXParser.parser import db
 from tests.API import base
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
@@ -106,7 +106,13 @@ class ParserServer(TestCase):
         input:
             s: AVRO message: ParserInputSchema
         """
-        s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
+        cls = initialize_parser()(
+            self.producer, self.ser_schema, self.schema_client, self.logger.logger
+        )
+        record_id = str(uuid.uuid4())
+        s = {"record_id": record_id, "status": "Error", "task": "ARXIV"}
+        db.write_job_status(cls, s)
+        s = {"record_id": record_id, "persistence": False, "task": "REPARSE"}
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
             responses = stub.initParser(s)
@@ -124,7 +130,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Processing")
                     ),
@@ -154,7 +160,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Processing")
                     ),
@@ -188,7 +194,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Error")
                     ),
@@ -238,7 +244,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Success")
                     ),
@@ -266,7 +272,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Error")
                     ),
@@ -294,7 +300,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Processing")
                     ),
@@ -324,7 +330,7 @@ class ParserServer(TestCase):
         with grpc.insecure_channel(f"localhost:{self.port}") as channel:
             with base.base_utils.mock_multiple_targets(
                 {
-                    "write_job_status": patch.object(db, "write_job_status", return_value=True),
+                    "update_job_status": patch.object(db, "update_job_status", return_value=True),
                     "get_job_status_by_record_id": patch.object(
                         db, "get_job_status_by_record_id", return_value=fake_db_entry("Error")
                     ),
@@ -349,31 +355,41 @@ class ParserServer(TestCase):
         cls = initialize_parser()(
             self.producer, self.ser_schema, self.schema_client, self.logger.logger
         )
-        s = {"record_id": str(uuid.uuid4()), "persistence": False, "task": "REPARSE"}
-        with grpc.insecure_channel(f"localhost:{self.port}") as channel:
-            stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
-            responses = stub.initParser(s)
-            output_hash = None
-            for response in list(responses):
-                output_hash = response.get("record_id")
-                self.assertEqual(response.get("status"), "Pending")
-                self.assertNotEqual(response.get("record_id"), None)
+        record_id = str(uuid.uuid4())
+        s = {"record_id": record_id, "status": "Error", "task": "ARXIV"}
+        db.write_job_status(cls, s)
 
-                s = {
-                    "task": "MONITOR",
-                    "record_id": output_hash,
-                    "persistence": False,
-                }
+        s = {"record_id": record_id, "persistence": False, "task": "REPARSE"}
+        with base.base_utils.mock_multiple_targets(
+            {
+                "update_job_status": patch.object(db, "update_job_status", return_value=True),
+            }
+        ):
+            with grpc.insecure_channel(f"localhost:{self.port}") as channel:
+                stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
+                responses = stub.initParser(s)
+                output_hash = None
+                for response in list(responses):
+                    output_hash = response.get("record_id")
+                    self.assertEqual(response.get("status"), "Pending")
+                    self.assertNotEqual(response.get("record_id"), None)
 
-        # Test update_job_status as well to mimic the Pipeline updating the status.
-        db.update_job_status(cls, output_hash, status="Processing")
+                    s = {
+                        "task": "MONITOR",
+                        "record_id": output_hash,
+                        "persistence": False,
+                    }
 
-        with grpc.insecure_channel(f"localhost:{self.port}") as channel:
-            stub = parser_grpc.ParserMonitorStub(channel, self.avroserialhelper)
-            responses = stub.monitorParser(s)
-            for response in list(responses):
-                self.assertEqual(response.get("status"), "Processing")
-                self.assertEqual(response.get("record_id"), s.get("record_id"))
+            # Test update_job_status as well to mimic the Pipeline updating the status.
+            db.update_job_status(cls, output_hash, status="Processing")
+
+            with grpc.insecure_channel(f"localhost:{self.port}") as channel:
+                stub = parser_grpc.ParserMonitorStub(channel, self.avroserialhelper)
+                responses = stub.monitorParser(s)
+                print(list(responses))
+                for response in list(responses):
+                    self.assertEqual(response.get("status"), "Processing")
+                    self.assertEqual(response.get("record_id"), s.get("record_id"))
 
     def test_Parser_server_view(self):
         """

@@ -110,6 +110,8 @@ def update_job_status(cls, record_id, status=None):
             job_status.date_of_last_attempt = datetime.datetime.now()
             if status == "Success":
                 job_status.date_of_last_success = job_status.date_of_last_attempt
+            else:
+                job_status.date_of_last_success = job_status.date_of_last_success
             session.add(job_status)
             session.commit()
             updated = True

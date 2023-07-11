@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import json
 import logging
 import sys
 
@@ -100,17 +101,18 @@ async def run() -> None:
 
     logger = Logging(logging)
     schema = get_schema(logger, schema_client, "ParserInputSchema")
+    viewschema = get_schema(logger, schema_client, "ParserOutputSchema")
 
     avroserialhelper = AvroSerialHelper(schema)
-
+    viewserialhelper = AvroSerialHelper(ser_schema=schema, des_schema=viewschema)
     args = input_parser(sys.argv[1:])
-    async with grpc.aio.insecure_channel("localhost:50051") as channel:
+    async with grpc.aio.insecure_channel("localhost:50052") as channel:
         s = output_message(args)
         if s["task"] == "VIEW":
             try:
-                stub = parser_grpc.ParserViewStub(channel, avroserialhelper)
+                stub = parser_grpc.ParserViewStub(channel, viewserialhelper)
                 async for response in stub.viewParser(s):
-                    print(response)
+                    print(json.dumps(response))
 
             except grpc.aio._call.AioRpcError as e:
                 code = e.code()

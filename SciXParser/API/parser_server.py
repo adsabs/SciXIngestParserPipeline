@@ -25,7 +25,7 @@ from API.grpc_modules.parser_grpc import (
     add_ParserMonitorServicer_to_server,
     add_ParserViewServicer_to_server,
 )
-from parser import db
+from SciXParser.parser import db
 
 HERE = Path(__file__).parent
 proj_home = str(HERE / "..")
@@ -174,7 +174,7 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
                 topic=self.topic, value=job_request, value_schema=self.req_schema
             )
 
-            db.write_job_status(self, job_request)
+            db.update_job_status(self, job_request.get("record_id"), status=job_request["status"])
 
             yield job_request
 
@@ -189,7 +189,7 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
             record_id = request["record_id"]
             record = {}
             with self.session_scope() as session:
-                record["parsed_record"] = db.get_parser_record(session, record_id).parsed_record
+                record["parsed_record"] = db.get_parser_record(session, record_id).parsed_data
             record["record_id"] = record_id
             yield record
 

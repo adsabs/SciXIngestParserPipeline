@@ -10,8 +10,8 @@ from confluent_kafka.avro import AvroProducer
 from mock import patch
 from SciXPipelineUtils import s3_methods, utils
 
-from parser.parser import PARSER_APP
 from SciXParser.parser import db
+from SciXParser.parser.parser import PARSER_APP
 from tests.common.mockschemaregistryclient import MockSchemaRegistryClient
 
 

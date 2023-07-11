@@ -13,12 +13,12 @@ class Status(enum.Enum):
     Processing = 2
     Error = 3
     Success = 4
+    Unchanged = 5
 
 
 class Source(enum.Enum):
     ARXIV = 1
     REPARSE = 2
-    SYMBOL3 = 3
 
 
 class gRPC_status(Base):

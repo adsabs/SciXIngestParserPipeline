@@ -11,7 +11,7 @@ from SciXPipelineUtils.s3_methods import load_s3_providers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from parser import db, parsing_handler
+from SciXParser.parser import db, parsing_handler
 
 
 def init_pipeline(proj_home, consumer_topic_name=None, consumer_schema_name=None):
