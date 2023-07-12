@@ -16,11 +16,12 @@ def reparse_handler(app, job_request, producer):
     with app.session_scope() as session:
         record_entry = db.get_parser_record(session, metadata_uuid)
         try:
-            producer_message = record_entry.parsed_data
             record_source = record_entry.source.name
-            if producer_message:
+            producer_message = {}
+            if record_entry.parsed_data:
                 producer_message["task"] = record_source
-                producer_message["record_id"] = metadata_uuid
+                producer_message["record_id"] = str(metadata_uuid)
+                producer_message["parsed_record"] = record_entry.parsed_data
             s3_path = record_entry.s3_key
         except AttributeError:
             app.logger.exception(
@@ -28,9 +29,10 @@ def reparse_handler(app, job_request, producer):
             )
             status = "Error"
             producer_message = None
+            db.update_job_status(app, job_request["record_id"], status)
 
     # If resend, only resend the data from the DB, do not initiate a parsing task.
-    if job_request.get("resend") and producer_message:
+    if job_request.get("resend") and producer_message.get("parsed_record"):
         parser_output_schema = utils.get_schema(
             app, app.schema_client, app.config.get("PARSER_OUTPUT_SCHEMA")
         )
@@ -43,13 +45,27 @@ def reparse_handler(app, job_request, producer):
             )
             status = "Success"
 
-        except Exception:
+        except ValueError:
             app.logger.exception(
                 "Failed to produce {} to Kafka topic: {}".format(
                     metadata_uuid, app.config.get("PARSER_OUTPUT_TOPIC")
                 )
             )
             status = "Error"
+
+        db.update_job_status(app, job_request["record_id"], status)
+
+        return status
+
+    elif job_request.get("resend"):
+        app.logger.error(
+            "Failed to produce {} to Kafka topic: {} because there is no parsed record to resend.".format(
+                metadata_uuid, app.config.get("PARSER_OUTPUT_TOPIC")
+            )
+        )
+        status = "Error"
+
+        db.update_job_status(app, job_request["record_id"], status)
 
         return status
 

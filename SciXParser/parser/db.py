@@ -82,7 +82,7 @@ def _get_job_by_record_id(session, record_id, only_status=None):
     return record_db
 
 
-def write_job_status(cls, job_request, only_status=None):
+def write_job_status(cls, job_request):
     """
     Write new status for job to db
     """

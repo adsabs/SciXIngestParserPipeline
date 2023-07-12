@@ -36,9 +36,15 @@ class TestParser(TestCase):
                 mock_app._init_logger()
                 producer = AvroProducer({}, schema_registry=mock_app.schema_client)
                 mock_app.parser_task(mock_job_request, producer)
+                self.assertEqual(
+                    db.get_job_status_by_record_id(
+                        mock_app, [mock_job_request.value()["record_id"]]
+                    ).name,
+                    "Success",
+                )
 
     def test_parser_task_bad_source(self):
-        mock_job_request = base.mock_job_request
+        mock_job_request = base.mock_job_request(source="trash")
         url = "https://test.bucket.domain"
         with open("SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc") as f:
             schema_str = f.read()
@@ -56,7 +62,13 @@ class TestParser(TestCase):
                 mock_app.schema_client = MockSchemaRegistryClient()
                 mock_app._init_logger()
                 producer = AvroProducer({}, schema_registry=mock_app.schema_client)
-                mock_app.parser_task(mock_job_request(source="trash"), producer)
+                mock_app.parser_task(mock_job_request, producer)
+                self.assertEqual(
+                    db.get_job_status_by_record_id(
+                        mock_app, [mock_job_request.value()["record_id"]]
+                    ).name,
+                    "Error",
+                )
 
     @moto.mock_s3
     def test_reparse_task_alternate_s3(self):
@@ -110,8 +122,15 @@ class TestParser(TestCase):
                         return_value.parsed_data,
                         return_value.source,
                     )
+                    db.write_job_status(mock_app, mock_job_request.value())
                     producer = AvroProducer({}, schema_registry=mock_app.schema_client)
                     mock_app.parser_task(mock_job_request, producer)
+                    self.assertEqual(
+                        db.get_job_status_by_record_id(
+                            mock_app, [mock_job_request.value()["record_id"]]
+                        ).name,
+                        "Success",
+                    )
 
     @moto.mock_s3
     def test_reparse_task_alternate_s3_no_object(self):
@@ -148,8 +167,15 @@ class TestParser(TestCase):
                         return_value.parsed_data,
                         return_value.source,
                     )
+                    db.write_job_status(mock_app, mock_job_request.value())
                     with pytest.raises(ValueError):
                         mock_app.parser_task(mock_job_request, producer)
+                    self.assertEqual(
+                        db.get_job_status_by_record_id(
+                            mock_app, [mock_job_request.value()["record_id"]]
+                        ).name,
+                        "Error",
+                    )
 
     @moto.mock_s3
     def test_reparse_task(self):
@@ -197,7 +223,15 @@ class TestParser(TestCase):
                 return_value.parsed_data,
                 return_value.source,
             )
+            db.write_job_status(mock_app, mock_job_request.value())
             mock_app.parser_task(mock_job_request, producer)
+            self.assertEqual(
+                db.get_job_status_by_record_id(
+                    mock_app, [mock_job_request.value()["record_id"]]
+                ).name,
+                "Success",
+            )
+
         moto_fake.stop()
 
     @moto.mock_s3
@@ -249,7 +283,14 @@ class TestParser(TestCase):
                 return_value.parsed_data,
                 return_value.source,
             )
+            db.write_job_status(mock_app, mock_job_request.value())
             mock_app.parser_task(mock_job_request, producer)
+            self.assertEqual(
+                db.get_job_status_by_record_id(
+                    mock_app, [mock_job_request.value()["record_id"]]
+                ).name,
+                "Success",
+            )
         moto_fake.stop()
 
     @moto.mock_s3
@@ -303,7 +344,16 @@ class TestParser(TestCase):
                 return_value.parsed_data,
                 return_value.source,
             )
+
+            db.write_job_status(mock_app, mock_job_request.value())
             mock_app.parser_task(mock_job_request, producer)
+            self.assertEqual(
+                db.get_job_status_by_record_id(
+                    mock_app, [mock_job_request.value()["record_id"]]
+                ).name,
+                "Success",
+            )
+
         moto_fake.stop()
 
     def test_reparse_task_resend(self):
@@ -339,4 +389,79 @@ class TestParser(TestCase):
                 return_value.parsed_data,
                 return_value.source,
             )
+            db.write_job_status(mock_app, mock_job_request.value())
             mock_app.parser_task(mock_job_request, producer)
+            self.assertEqual(
+                db.get_job_status_by_record_id(
+                    mock_app, [mock_job_request.value()["record_id"]]
+                ).name,
+                "Success",
+            )
+
+    def test_reparse_task_resend_no_parsed_record(self):
+        mock_job_request = base.mock_reparse_job_request(force=False, resend=True)
+        with open("SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc") as f:
+            schema_str = f.read()
+
+        with base.base_utils.mock_multiple_targets(
+            {
+                "get_schema": patch.object(
+                    utils,
+                    "get_schema",
+                    return_value=schema_str,
+                )
+            }
+        ):
+            return_value = base.mock_reparse_db_entry(
+                str(mock_job_request.record_id),
+                "/{}".format(mock_job_request.record_id),
+            )
+            mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
+            mock_app.schema_client = MockSchemaRegistryClient()
+            mock_app._init_logger()
+            producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+            db.write_parser_record(
+                mock_app,
+                return_value.id,
+                return_value.date_created,
+                return_value.s3_key,
+                return_value.parsed_data,
+                return_value.source,
+            )
+            db.write_job_status(mock_app, mock_job_request.value())
+            mock_app.parser_task(mock_job_request, producer)
+            self.assertEqual(
+                db.get_job_status_by_record_id(
+                    mock_app, [mock_job_request.value()["record_id"]]
+                ).name,
+                "Error",
+            )
+
+    def test_reparse_task_resend_no_record_in_db(self):
+        mock_job_request = base.mock_reparse_job_request(force=False, resend=True)
+        with open("SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc") as f:
+            schema_str = f.read()
+
+        with base.base_utils.mock_multiple_targets(
+            {
+                "get_schema": patch.object(
+                    utils,
+                    "get_schema",
+                    return_value=schema_str,
+                )
+            }
+        ):
+            mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
+            mock_app.schema_client = MockSchemaRegistryClient()
+            mock_app._init_logger()
+            producer = AvroProducer({}, schema_registry=mock_app.schema_client)
+
+            db.write_job_status(mock_app, mock_job_request.value())
+            with pytest.raises(AttributeError):
+                mock_app.parser_task(mock_job_request, producer)
+            self.assertEqual(
+                db.get_job_status_by_record_id(
+                    mock_app, [mock_job_request.value()["record_id"]]
+                ).name,
+                "Error",
+            )
