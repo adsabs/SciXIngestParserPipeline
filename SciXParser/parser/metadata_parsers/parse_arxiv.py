@@ -58,7 +58,7 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
             )
             status = "Success"
 
-        except Exception as e:
+        except ValueError as e:
             app.logger.exception(
                 "Failed to produce {} to Kafka topic: {}".format(
                     record_id, app.config.get("PARSER_OUTPUT_TOPIC")

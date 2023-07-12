@@ -43,6 +43,36 @@ class TestParser(TestCase):
                     "Success",
                 )
 
+    def test_parser_task_producer_failure(self):
+        mock_job_request = base.mock_job_request()
+        url = "https://test.bucket.domain"
+        with open("SciXParser/tests/stubdata/AVRO_schemas/ParserOutputSchema.avsc") as f:
+            schema_str = f.read()
+        with patch.dict(os.environ, {"MOTO_S3_CUSTOM_ENDPOINTS": url}):
+            with moto.mock_s3() and base.base_utils.mock_multiple_targets(
+                {
+                    "get_schema": patch.object(
+                        utils,
+                        "get_schema",
+                        return_value=schema_str,
+                    )
+                }
+            ):
+                mock_app = PARSER_APP(proj_home="SciXParser/tests/stubdata/")
+                mock_app.schema_client = MockSchemaRegistryClient()
+                mock_app._init_logger()
+                producer = (
+                    base.bad_producer()
+                )  # AvroProducer({}, schema_registry=mock_app.schema_client)
+                with pytest.raises(ValueError):
+                    mock_app.parser_task(mock_job_request, producer)
+                self.assertEqual(
+                    db.get_job_status_by_record_id(
+                        mock_app, [mock_job_request.value()["record_id"]]
+                    ).name,
+                    "Error",
+                )
+
     def test_parser_task_bad_source(self):
         mock_job_request = base.mock_job_request(source="trash")
         url = "https://test.bucket.domain"

@@ -59,6 +59,11 @@ class mock_reparse_job_request(object):
         }
 
 
+class bad_producer(object):
+    def produce(*args, **kwargs):
+        raise ValueError
+
+
 class mock_reparse_db_entry(object):
     def __init__(self, record_id, s3_key, record=None):
         self.id = record_id

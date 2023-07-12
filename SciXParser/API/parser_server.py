@@ -150,7 +150,7 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
                         msg = next(listener.get_status_redis(record_id, self.logger))
                         self.logger.debug("PARSER: Redis published status: {}".format(msg))
                     except Exception as e:
-                        self.logger.error("failed to read message with error: {}.".format(e))
+                        self.logger.exception("failed to read message with error: {}.".format(e))
                         continue
             return
 
