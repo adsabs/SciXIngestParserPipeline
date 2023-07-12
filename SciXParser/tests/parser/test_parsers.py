@@ -289,7 +289,7 @@ class TestParser(TestCase):
                 db.get_job_status_by_record_id(
                     mock_app, [mock_job_request.value()["record_id"]]
                 ).name,
-                "Success",
+                "Unchanged",
             )
         moto_fake.stop()
 
