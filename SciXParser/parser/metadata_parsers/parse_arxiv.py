@@ -36,6 +36,7 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
         if old_record == test_record and force is not True:
             record_status = False
             status = "Unchanged"
+
         else:
             with app.session_scope() as session:
                 record_status = db.update_parser_record_metadata(
