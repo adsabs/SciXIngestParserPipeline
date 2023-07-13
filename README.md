@@ -63,6 +63,8 @@ Currently, there are three methods that have been defined in the API for interac
 ```bash
 #This command tells the server to initialize a job by adding a message to the Parser Topic
 python3 API/parser_client.py REPARSE --uuid "<string of space separated uuids>"
+#This command tells the server to initialize a job by adding a message to the Parser Topic using uuids read from a line separated file.
+python3 API/parser_client.py REPARSE --uuid-file "$PATH_TO_UUID_FILE"
 #This command asks the server to check on the current status of a record with id <uuid>
 python3 API/parser_client.py MONITOR --uuid '<single uuid>'
 #This command returns the current parsed record for a given <uuid>
