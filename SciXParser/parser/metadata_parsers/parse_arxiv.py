@@ -36,6 +36,7 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
         if old_record == test_record and force is not True:
             record_status = False
             status = "Unchanged"
+
         else:
             with app.session_scope() as session:
                 record_status = db.update_parser_record_metadata(
@@ -57,7 +58,7 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
             )
             status = "Success"
 
-        except Exception as e:
+        except ValueError as e:
             app.logger.exception(
                 "Failed to produce {} to Kafka topic: {}".format(
                     record_id, app.config.get("PARSER_OUTPUT_TOPIC")

@@ -82,7 +82,7 @@ def _get_job_by_record_id(session, record_id, only_status=None):
     return record_db
 
 
-def write_job_status(cls, job_request, only_status=None):
+def write_job_status(cls, job_request):
     """
     Write new status for job to db
     """
@@ -110,6 +110,8 @@ def update_job_status(cls, record_id, status=None):
             job_status.date_of_last_attempt = datetime.datetime.now()
             if status == "Success":
                 job_status.date_of_last_success = job_status.date_of_last_attempt
+            else:
+                job_status.date_of_last_success = job_status.date_of_last_success
             session.add(job_status)
             session.commit()
             updated = True

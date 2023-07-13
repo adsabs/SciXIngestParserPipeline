@@ -28,8 +28,8 @@ class base_utils(TestCase):
 
 
 class mock_job_request(object):
-    def __init__(self, source="ARXIV"):
-        self.record_id = uuid.uuid4()
+    def __init__(self, source="ARXIV", n_ids=1):
+        self.record_id = " ".join([str(uuid.uuid4()) for _ in range(0, n_ids)])
         self.source = source
 
     def value(self):
@@ -57,6 +57,11 @@ class mock_reparse_job_request(object):
             "force": self.force,
             "resend": self.resend,
         }
+
+
+class bad_producer(object):
+    def produce(*args, **kwargs):
+        raise ValueError
 
 
 class mock_reparse_db_entry(object):

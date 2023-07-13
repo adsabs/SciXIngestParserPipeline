@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import json
 import logging
 import sys
 
@@ -35,6 +36,7 @@ def input_parser(cli_args):
         action="store",
         dest="uuid",
         type=str,
+        default=None,
         help="The UUID of the record to be reparsed.",
     )
     process_parser.add_argument(
@@ -50,6 +52,14 @@ def input_parser(cli_args):
         dest="resend",
         default=False,
         help="Resend the current version of the parsed record as it exists in the DB.",
+    )
+    process_parser.add_argument(
+        "--uuid-file",
+        action="store",
+        dest="uuid_file",
+        type=str,
+        default=None,
+        help="File path containing a list of the records to be reparsed, one per line.",
     )
 
     process_parser = subparsers.add_parser("VIEW", help="Initialize a job with given inputs")
@@ -92,7 +102,22 @@ def output_message(args):
     if s["task"] == "REPARSE":
         s["force"] = args.force
         s["resend"] = args.resend
+        if args.uuid_file:
+            s["record_id"] = break_bulk_entries(args)
+
+    if not s["record_id"]:
+        raise AttributeError("No record identifiers provided. Stopping.")
     return s
+
+
+def break_bulk_entries(args):
+    try:
+        with open(args.uuid_file, "r") as f:
+            uuids = f.read()
+            return uuids
+    except Exception as e:
+        print("Failed to parse UUIDs from input file. Stopping")
+        raise e
 
 
 async def run() -> None:
@@ -100,17 +125,18 @@ async def run() -> None:
 
     logger = Logging(logging)
     schema = get_schema(logger, schema_client, "ParserInputSchema")
+    viewschema = get_schema(logger, schema_client, "ParserOutputSchema")
 
     avroserialhelper = AvroSerialHelper(schema)
-
+    viewserialhelper = AvroSerialHelper(ser_schema=schema, des_schema=viewschema)
     args = input_parser(sys.argv[1:])
-    async with grpc.aio.insecure_channel("localhost:50051") as channel:
+    async with grpc.aio.insecure_channel("localhost:50052") as channel:
         s = output_message(args)
         if s["task"] == "VIEW":
             try:
-                stub = parser_grpc.ParserViewStub(channel, avroserialhelper)
+                stub = parser_grpc.ParserViewStub(channel, viewserialhelper)
                 async for response in stub.viewParser(s):
-                    print(response)
+                    print(json.dumps(response))
 
             except grpc.aio._call.AioRpcError as e:
                 code = e.code()

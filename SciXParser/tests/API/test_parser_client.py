@@ -65,3 +65,56 @@ class TestParserClient(TestCase):
         self.assertEqual(args.persistence, True)
         self.assertEqual(args.resend, True)
         self.assertEqual(args.force, False)
+
+    def test_input_parser_multiple_uuids(self):
+        with open("SciXParser/tests/stubdata/test_uuid_file.txt", "r") as f:
+            uuids = f.read()
+
+        input_args = [
+            "REPARSE",
+            "--uuid",
+            uuids,
+            "--force",
+        ]
+
+        args = input_parser(input_args)
+        self.assertEqual(args.action, input_args[0])
+        self.assertEqual(args.force, True)
+
+        s = output_message(args)
+        self.assertEqual(s["task"], "REPARSE")
+        self.assertEqual(s["record_id"], uuids)
+
+    def test_input_parser_file(self):
+        input_args = [
+            "REPARSE",
+            "--uuid-file",
+            "SciXParser/tests/stubdata/test_uuid_file.txt",
+            "--force",
+        ]
+
+        with open("SciXParser/tests/stubdata/test_uuid_file.txt", "r") as f:
+            uuids = f.read()
+
+        args = input_parser(input_args)
+        self.assertEqual(args.action, input_args[0])
+        self.assertEqual(args.force, True)
+
+        s = output_message(args)
+        self.assertEqual(s["task"], "REPARSE")
+        self.assertEqual(s["record_id"], uuids)
+
+    def test_input_parser_no_uuid(self):
+        input_args = [
+            "REPARSE",
+            "--uuid",
+            "",
+            "--force",
+        ]
+
+        args = input_parser(input_args)
+        self.assertEqual(args.action, input_args[0])
+        self.assertEqual(args.force, True)
+
+        with pytest.raises(AttributeError):
+            output_message(args)

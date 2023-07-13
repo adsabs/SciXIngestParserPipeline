@@ -25,7 +25,7 @@ from API.grpc_modules.parser_grpc import (
     add_ParserMonitorServicer_to_server,
     add_ParserViewServicer_to_server,
 )
-from parser import db
+from SciXParser.parser import db
 
 HERE = Path(__file__).parent
 proj_home = str(HERE / "..")
@@ -150,7 +150,7 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
                         msg = next(listener.get_status_redis(record_id, self.logger))
                         self.logger.debug("PARSER: Redis published status: {}".format(msg))
                     except Exception as e:
-                        self.logger.error("failed to read message with error: {}.".format(e))
+                        self.logger.exception("failed to read message with error: {}.".format(e))
                         continue
             return
 
@@ -162,21 +162,28 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
                     b" %s." % json.dumps(request.get("task_args")).encode("utf-8")
                 )
             )
+
             job_request = request
-            persistence = job_request.get("persistence", False)
+            record_ids = job_request.get("record_id").split()
+
+            if len(record_ids) > 1:
+                persistence = False
+            else:
+                persistence = job_request.get("persistence", False)
             job_request.pop("persistence")
 
-            self.logger.info(job_request)
-
             job_request["status"] = "Pending"
+            for record_id in record_ids:
+                job_request["record_id"] = record_id
+                self.producer.produce(
+                    topic=self.topic, value=job_request, value_schema=self.req_schema
+                )
 
-            self.producer.produce(
-                topic=self.topic, value=job_request, value_schema=self.req_schema
-            )
+                db.update_job_status(
+                    self, job_request.get("record_id"), status=job_request["status"]
+                )
 
-            db.write_job_status(self, job_request)
-
-            yield job_request
+                yield job_request
 
             if persistence:
                 listener = Listener()
@@ -189,7 +196,7 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
             record_id = request["record_id"]
             record = {}
             with self.session_scope() as session:
-                record["parsed_record"] = db.get_parser_record(session, record_id).parsed_record
+                record["parsed_record"] = db.get_parser_record(session, record_id).parsed_data
             record["record_id"] = record_id
             yield record
 
