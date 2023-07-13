@@ -1,4 +1,4 @@
-[![Python CI actions](https://github.com/tjacovich/SciXIngestParserPipeline/actions/workflows/python_actions.yml/badge.svg)](https://github.com/tjacovich/SciXIngestParserPipeline/actions/workflows/python_actions.yml) [![Coverage Status](https://coveralls.io/repos/github/tjacovich/SciXIngestParserPipeline/badge.svg?branch=main)](https://coveralls.io/github/tjacovich/SciXIngestParserPipeline?branch=main)
+[![Python CI actions](https://github.com/adsabs/SciXIngestParserPipeline/actions/workflows/python_actions.yml/badge.svg)](https://github.com/adsabs/SciXIngestParserPipeline/actions/workflows/python_actions.yml) [![Coverage Status](https://coveralls.io/repos/github/adsabs/SciXIngestParserPipeline/badge.svg?branch=main)](https://coveralls.io/github/adsabs/SciXIngestParserPipeline?branch=main)
 
 ![Parser Pipeline Flowchart](README_assets/Parser_Pipeline_implementation.png?raw=true "Parser Pipeline Flowchart")
 # Setting Up a Development Environment
@@ -58,18 +58,22 @@ python3 run.py PARSER_APP
 ```
 # Sending commands to the gRPC API
 
-Currently, there are two methods that have been defined in the API for interacting with the Parser Pipeline.
+Currently, there are three methods that have been defined in the API for interacting with the Parser Pipeline.
 
-- `PARSER_INIT`: Initialize a job with given job_args passed into the script as a JSON.
-- `PARSER_MONITOR`: Queries the status of a job with a given <job_id>
-
-Additionally, calling either command with --persistence will open a persistent connection that streams updates for the specificed job.
 ```bash
 #This command tells the server to initialize a job by adding a message to the Parser Topic
-python3 API/parser_client.py PARSER_INIT --task "SYMBOL1" --task_args '{"ingest_type": "", "daterange": "YYYY-MM-DD"}'
-#This command asks the server to check on the current status of a job with <job_id>
-python3 API/parser_client.py PARSER_MONITOR --job_id '<job_id>'
+python3 API/parser_client.py REPARSE --uuid "<string of space separated uuids>"
+#This command asks the server to check on the current status of a record with id <uuid>
+python3 API/parser_client.py MONITOR --uuid '<single uuid>'
+#This command returns the current parsed record for a given <uuid>
+python3 API/parser_client.py VIEW --uuid '<single uuid>'
 ```
+
+`REPARSE` takes optional arguments:
+- `--force` : forces reparsed data to be sent to the Kafka topic regardless of whether the data has changed.
+- `--resend-only` : Only resends the current parsed data stored in the database without doing any parsing.
+
+Additionally, calling `REPARSE` or `MONITOR` command with --persistence will open a persistent connection that streams updates for the specificed uuid if only one is provided.
 
 ## Maintainers
 
