@@ -162,21 +162,28 @@ def initialize_parser(gRPC_Servicer=ParserInitServicer):
                     b" %s." % json.dumps(request.get("task_args")).encode("utf-8")
                 )
             )
+
             job_request = request
-            persistence = job_request.get("persistence", False)
+            record_ids = job_request.get("record_id").split()
+
+            if len(record_ids) > 1:
+                persistence = False
+            else:
+                persistence = job_request.get("persistence", False)
             job_request.pop("persistence")
 
-            self.logger.info(job_request)
-
             job_request["status"] = "Pending"
+            for record_id in record_ids:
+                job_request["record_id"] = record_id
+                self.producer.produce(
+                    topic=self.topic, value=job_request, value_schema=self.req_schema
+                )
 
-            self.producer.produce(
-                topic=self.topic, value=job_request, value_schema=self.req_schema
-            )
+                db.update_job_status(
+                    self, job_request.get("record_id"), status=job_request["status"]
+                )
 
-            db.update_job_status(self, job_request.get("record_id"), status=job_request["status"])
-
-            yield job_request
+                yield job_request
 
             if persistence:
                 listener = Listener()

@@ -120,6 +120,28 @@ class ParserServer(TestCase):
                 self.assertEqual(response.get("status"), "Pending")
                 self.assertNotEqual(response.get("record_id"), None)
 
+    def test_Parser_server_init_multi_record(self):
+        """
+        A test the of INIT method for the gRPC server
+        input:
+            s: AVRO message: ParserInputSchema
+        """
+        cls = initialize_parser()(
+            self.producer, self.ser_schema, self.schema_client, self.logger.logger
+        )
+        record_id = " ".join([str(uuid.uuid4()) for _ in range(0, 5)])
+        for record in record_id.split():
+            s = {"record_id": record, "status": "Error", "task": "ARXIV"}
+            db.write_job_status(cls, s)
+
+        s = {"record_id": record_id, "persistence": False, "task": "REPARSE"}
+        with grpc.insecure_channel(f"localhost:{self.port}") as channel:
+            stub = parser_grpc.ParserInitStub(channel, self.avroserialhelper)
+            responses = stub.initParser(s)
+            for response in list(responses):
+                self.assertEqual(response.get("status"), "Pending")
+                self.assertNotEqual(response.get("record_id"), None)
+
     def test_Parser_server_init_persistence(self):
         """
         A test of the INIT method for the gRPC server with persistence
