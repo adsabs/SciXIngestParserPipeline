@@ -1,208 +1,215 @@
 {
-     "recordData": {
-          "createdTime": "",
-          "parsedTime": "2023-06-23T13:49:50.791911Z",
-          "loadType": "fromFile",
-          "loadFormat": "OtherXML",
-          "loadLocation": "",
-          "recordOrigin": ""
-     },
-     "relatedTo": null,
-     "editorialHistory": null,
-     "pubDate": {
-          "electrDate": "2021-07-22",
-          "printDate": null,
-          "otherDate": null
-     },
-     "publication": {
-          "docType": null,
-          "pubName": "eprint arXiv:2107.10460",
-          "confName": null,
-          "confLocation": null,
-          "confDates": null,
-          "confEditors": null,
-          "confPID": null,
-          "publisher": null,
-          "issueNum": null,
-          "volumeNum": null,
-          "pubYear": "2021",
-          "bookSeries": null,
-          "ISSN": null,
-          "isRefereed": null
-     },
-     "persistentIDs": [
-          {
-               "Crossref": null,
-               "ISBN": null,
-               "DOI": "10.1038/s41535-022-00470-6",
-               "preprint": {
-                    "source": "arXiv",
-                    "identifier": "2107.10460"
-               }
-          }
-     ],
-     "publisherIDs": null,
-     "pagination": null,
-     "authors": [
-          {
-               "name": {
-                    "surname": "Terashima",
-                    "given_name": "Taichi",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Terashima, Taichi",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Hirose",
-                    "given_name": "Hishiro",
-                    "middle_name": "T.",
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Hirose, Hishiro T.",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Kikugawa",
-                    "given_name": "Naoki",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Kikugawa, Naoki",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Uji",
-                    "given_name": "Shinya",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Uji, Shinya",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Graf",
-                    "given_name": "David",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Graf, David",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Morinari",
-                    "given_name": "Takao",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Morinari, Takao",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Wang",
-                    "given_name": "Teng",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Wang, Teng",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          },
-          {
-               "name": {
-                    "surname": "Mu",
-                    "given_name": "Gang",
-                    "middle_name": null,
-                    "prefix": null,
-                    "suffix": null,
-                    "pubraw": "Mu, Gang",
-                    "native_lang": null,
-                    "collab": null
-               },
-               "affiliation": null,
-               "attrib": null
-          }
-     ],
-     "otherContributor": null,
-     "title": {
-          "textEnglish": "Anomalous High-Field Magnetotransport in CaFeAsF due to the Quantum Hall Effect",
-          "textNative": null,
-          "langNative": null
-     },
-     "subtitle": null,
-     "abstract": {
-          "textEnglish": "CaFeAsF is an iron-based superconductor parent compound whose Fermi surface is quasi-two dimensional, composed of Dirac-electron and Schr\\\"odinger-hole cylinders elongated along the $c$ axis. We measured the longitudinal and Hall resistivities in CaFeAsF with the electrical current in the $ab$ plane in magnetic fields up to 45 T applied along the $c$ axis and obtained the corresponding conductivities via tensor inversion. We found that both the longitudinal and Hall conductivities approached zero above $\\sim$40 T as the temperature was lowered to 0.4 K. Our analysis indicates that the Landau-level filling factor is $\\nu$ = 2 for both electrons and holes at these high field strengths, resulting in a total filling factor $\\nu$ = $\\nu_{hole} - \\nu_{electron}$ = 0. We therefore argue that the $\\nu$ = 0 quantum Hall state emerges under these conditions.",
-          "textNative": null,
-          "langNative": null
-     },
-     "comments": [
-          {
-               "commentOrigin": "arxiv",
-               "commentText": "Comment: 18 pages, 1 table, 4 figures"
-          }
-     ],
-     "fulltext": null,
-     "acknowledgements": null,
-     "references": null,
-     "backmatter": null,
-     "astronomicalObjects": null,
-     "esources": null,
-     "dataLinks": null,
-     "doctype": null,
-     "keywords": [
-          {
-               "keyString": "Condensed Matter - Superconductivity",
-               "keySystem": "arxiv",
-               "keyIdent": null
-          },
-          {
-               "keyString": "Condensed Matter - Materials Science",
-               "keySystem": "arxiv",
-               "keyIdent": null
-          },
-          {
-               "keyString": "Condensed Matter - Strongly Correlated Electrons",
-               "keySystem": "arxiv",
-               "keyIdent": null
-          }
-     ],
-     "copyright": null,
-     "openAccess": null,
-     "pubnote": null,
-     "funding": null,
-     "version": null
+    "recordData": {
+      "createdTime": "",
+      "parsedTime": "2024-11-05T16:30:11.873107Z",
+      "loadType": "fromFile",
+      "loadFormat": "OtherXML",
+      "loadLocation": "",
+      "recordOrigin": ""
+    },
+    "relatedTo": null,
+    "editorialHistory": null,
+    "pubDate": {
+      "electrDate": "2021-07-22",
+      "printDate": null,
+      "otherDate": null
+    },
+    "publication": {
+      "docType": null,
+      "pubName": null,
+      "confName": null,
+      "confLocation": null,
+      "confDates": null,
+      "confEditors": null,
+      "confPID": null,
+      "publisher": null,
+      "issueNum": null,
+      "volumeNum": null,
+      "pubYear": "2021",
+      "bookSeries": null,
+      "ISSN": null,
+      "isRefereed": null
+    },
+    "persistentIDs": null,
+    "publisherIDs": [
+      {
+        "attribute": "urn",
+        "Identifier": "oai:arXiv.org:2107.10460"
+      },
+      {
+        "attribute": "publisher-id",
+        "Identifier": "http://arxiv.org/abs/2107.10460"
+      },
+      {
+        "attribute": "publisher-id",
+        "Identifier": "npj Quantum Materials 7, 62 (2022)"
+      },
+      {
+        "attribute": "publisher-id",
+        "Identifier": "doi:10.1038/s41535-022-00470-6"
+      }
+    ],
+    "pagination": null,
+    "authors": [
+      {
+        "name": {
+          "surname": "Terashima",
+          "given_name": "Taichi",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Terashima, Taichi",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Hirose",
+          "given_name": "Hishiro",
+          "middle_name": "T.",
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Hirose, Hishiro T.",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Kikugawa",
+          "given_name": "Naoki",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Kikugawa, Naoki",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Uji",
+          "given_name": "Shinya",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Uji, Shinya",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Graf",
+          "given_name": "David",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Graf, David",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Morinari",
+          "given_name": "Takao",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Morinari, Takao",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Wang",
+          "given_name": "Teng",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Wang, Teng",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      },
+      {
+        "name": {
+          "surname": "Mu",
+          "given_name": "Gang",
+          "middle_name": null,
+          "prefix": null,
+          "suffix": null,
+          "pubraw": "Mu, Gang",
+          "native_lang": null,
+          "collab": null
+        },
+        "affiliation": null,
+        "attrib": null
+      }
+    ],
+    "otherContributor": null,
+    "title": {
+      "textEnglish": "Anomalous High-Field Magnetotransport in CaFeAsF due to the Quantum Hall Effect",
+      "textNative": null,
+      "langNative": null
+    },
+    "subtitle": null,
+    "abstract": {
+      "textEnglish": "CaFeAsF is an iron-based superconductor parent compound whose Fermi surface is quasi-two dimensional, composed of Dirac-electron and Schr\\\"odinger-hole cylinders elongated along the $c$ axis. We measured the longitudinal and Hall resistivities in CaFeAsF with the electrical current in the $ab$ plane in magnetic fields up to 45 T applied along the $c$ axis and obtained the corresponding conductivities via tensor inversion. We found that both the longitudinal and Hall conductivities approached zero above $\\sim$40 T as the temperature was lowered to 0.4 K. Our analysis indicates that the Landau-level filling factor is $\\nu$ = 2 for both electrons and holes at these high field strengths, resulting in a total filling factor $\\nu$ = $\\nu_{hole} - \\nu_{electron}$ = 0. We therefore argue that the $\\nu$ = 0 quantum Hall state emerges under these conditions.",
+      "textNative": null,
+      "langNative": null
+    },
+    "comments": [
+      {
+        "commentOrigin": null,
+        "commentText": "Comment: 18 pages, 1 table, 4 figures"
+      }
+    ],
+    "fulltext": null,
+    "acknowledgements": null,
+    "references": null,
+    "backmatter": null,
+    "astronomicalObjects": null,
+    "esources": null,
+    "dataLinks": null,
+    "doctype": null,
+    "keywords": [
+      {
+        "keyString": "Condensed Matter - Superconductivity",
+        "keySystem": null,
+        "keyIdent": null
+      },
+      {
+        "keyString": "Condensed Matter - Materials Science",
+        "keySystem": null,
+        "keyIdent": null
+      },
+      {
+        "keyString": "Condensed Matter - Strongly Correlated Electrons",
+        "keySystem": null,
+        "keyIdent": null
+      }
+    ],
+    "copyright": null,
+    "openAccess": null,
+    "pubnote": null,
+    "funding": null,
+    "version": null
 }
