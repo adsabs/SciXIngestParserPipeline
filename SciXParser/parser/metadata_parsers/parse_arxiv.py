@@ -2,7 +2,7 @@ import copy
 import json
 from datetime import datetime
 
-from adsingestp.parsers.arxiv import ArxivParser
+from adsingestp.parsers.dubcore import DublinCoreParser
 from SciXPipelineUtils import utils
 
 from SciXParser.parser import db
@@ -16,7 +16,7 @@ def parse_store_arxiv_record(app, job_request, producer, reparse=False):
     metadata = job_request.get("record_xml")
     force = job_request.get("force", False)
     date = datetime.now()
-    arxiv_parser = ArxivParser()
+    arxiv_parser = DublinCoreParser()
     parser_output_schema = utils.get_schema(
         app, app.schema_client, app.config.get("PARSER_OUTPUT_SCHEMA")
     )
