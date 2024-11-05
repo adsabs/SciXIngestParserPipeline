@@ -1,111 +1,115 @@
 {
-    "recordData": {
-      "createdTime": "",
-      "parsedTime": "2023-06-23T13:49:50.791911Z",
-      "loadType": "fromFile",
-      "loadFormat": "OtherXML",
-      "loadLocation": "",
-      "recordOrigin": ""
+  "recordData": {
+    "createdTime": "",
+    "parsedTime": "2024-11-05T16:30:11.873107Z",
+    "loadType": "fromFile",
+    "loadFormat": "OtherXML",
+    "loadLocation": "",
+    "recordOrigin": ""
+  },
+  "pubDate": {
+    "electrDate": "2021-07-22"
+  },
+  "publication": {
+    "pubYear": "2021"
+  },
+  "publisherIDs": [
+    {
+      "attribute": "urn",
+      "Identifier": "oai:arXiv.org:2107.10460"
     },
-    "pubDate": {
-      "electrDate": "2021-07-22"
+    {
+      "attribute": "publisher-id",
+      "Identifier": "http://arxiv.org/abs/2107.10460"
     },
-    "publication": {
-      "pubName": "eprint arXiv:2107.10460",
-      "pubYear": "2021"
+    {
+      "attribute": "publisher-id",
+      "Identifier": "npj Quantum Materials 7, 62 (2022)"
     },
-    "persistentIDs": [
-      {
-        "DOI": "10.1038/s41535-022-00470-6",
-        "preprint": {
-          "source": "arXiv",
-          "identifier": "2107.10460"
-        }
+    {
+      "attribute": "publisher-id",
+      "Identifier": "doi:10.1038/s41535-022-00470-6"
+    }
+  ],
+  "authors": [
+    {
+      "name": {
+        "surname": "Terashima",
+        "given_name": "Taichi",
+        "pubraw": "Terashima, Taichi"
       }
-    ],
-    "authors": [
-      {
-        "name": {
-          "surname": "Terashima",
-          "given_name": "Taichi",
-          "pubraw": "Terashima, Taichi"
-        }
-      },
-      {
-        "name": {
-          "surname": "Hirose",
-          "given_name": "Hishiro",
-          "middle_name": "T.",
-          "pubraw": "Hirose, Hishiro T."
-        }
-      },
-      {
-        "name": {
-          "surname": "Kikugawa",
-          "given_name": "Naoki",
-          "pubraw": "Kikugawa, Naoki"
-        }
-      },
-      {
-        "name": {
-          "surname": "Uji",
-          "given_name": "Shinya",
-          "pubraw": "Uji, Shinya"
-        }
-      },
-      {
-        "name": {
-          "surname": "Graf",
-          "given_name": "David",
-          "pubraw": "Graf, David"
-        }
-      },
-      {
-        "name": {
-          "surname": "Morinari",
-          "given_name": "Takao",
-          "pubraw": "Morinari, Takao"
-        }
-      },
-      {
-        "name": {
-          "surname": "Wang",
-          "given_name": "Teng",
-          "pubraw": "Wang, Teng"
-        }
-      },
-      {
-        "name": {
-          "surname": "Mu",
-          "given_name": "Gang",
-          "pubraw": "Mu, Gang"
-        }
-      }
-    ],
-    "title": {
-      "textEnglish": "Anomalous High-Field Magnetotransport in CaFeAsF due to the Quantum Hall Effect"
     },
-    "abstract": {
-      "textEnglish": "CaFeAsF is an iron-based superconductor parent compound whose Fermi surface is quasi-two dimensional, composed of Dirac-electron and Schr\\\"odinger-hole cylinders elongated along the $c$ axis. We measured the longitudinal and Hall resistivities in CaFeAsF with the electrical current in the $ab$ plane in magnetic fields up to 45 T applied along the $c$ axis and obtained the corresponding conductivities via tensor inversion. We found that both the longitudinal and Hall conductivities approached zero above $\\sim$40 T as the temperature was lowered to 0.4 K. Our analysis indicates that the Landau-level filling factor is $\\nu$ = 2 for both electrons and holes at these high field strengths, resulting in a total filling factor $\\nu$ = $\\nu_{hole} - \\nu_{electron}$ = 0. We therefore argue that the $\\nu$ = 0 quantum Hall state emerges under these conditions."
+    {
+      "name": {
+        "surname": "Hirose",
+        "given_name": "Hishiro",
+        "middle_name": "T.",
+        "pubraw": "Hirose, Hishiro T."
+      }
     },
-    "comments": [
-      {
-        "commentOrigin": "arxiv",
-        "commentText": "Comment: 18 pages, 1 table, 4 figures"
+    {
+      "name": {
+        "surname": "Kikugawa",
+        "given_name": "Naoki",
+        "pubraw": "Kikugawa, Naoki"
       }
-    ],
-    "keywords": [
-      {
-        "keyString": "Condensed Matter - Superconductivity",
-        "keySystem": "arxiv"
-      },
-      {
-        "keyString": "Condensed Matter - Materials Science",
-        "keySystem": "arxiv"
-      },
-      {
-        "keyString": "Condensed Matter - Strongly Correlated Electrons",
-        "keySystem": "arxiv"
+    },
+    {
+      "name": {
+        "surname": "Uji",
+        "given_name": "Shinya",
+        "pubraw": "Uji, Shinya"
       }
-    ]
-  }
+    },
+    {
+      "name": {
+        "surname": "Graf",
+        "given_name": "David",
+        "pubraw": "Graf, David"
+      }
+    },
+    {
+      "name": {
+        "surname": "Morinari",
+        "given_name": "Takao",
+        "pubraw": "Morinari, Takao"
+      }
+    },
+    {
+      "name": {
+        "surname": "Wang",
+        "given_name": "Teng",
+        "pubraw": "Wang, Teng"
+      }
+    },
+    {
+      "name": {
+        "surname": "Mu",
+        "given_name": "Gang",
+        "pubraw": "Mu, Gang"
+      }
+    }
+  ],
+  "title": {
+    "textEnglish": "Anomalous High-Field Magnetotransport in CaFeAsF due to the Quantum Hall Effect"
+  },
+  "abstract": {
+    "textEnglish": "CaFeAsF is an iron-based superconductor parent compound whose Fermi surface is quasi-two dimensional, composed of Dirac-electron and Schr\\\"odinger-hole cylinders elongated along the $c$ axis. We measured the longitudinal and Hall resistivities in CaFeAsF with the electrical current in the $ab$ plane in magnetic fields up to 45 T applied along the $c$ axis and obtained the corresponding conductivities via tensor inversion. We found that both the longitudinal and Hall conductivities approached zero above $\\sim$40 T as the temperature was lowered to 0.4 K. Our analysis indicates that the Landau-level filling factor is $\\nu$ = 2 for both electrons and holes at these high field strengths, resulting in a total filling factor $\\nu$ = $\\nu_{hole} - \\nu_{electron}$ = 0. We therefore argue that the $\\nu$ = 0 quantum Hall state emerges under these conditions."
+  },
+  "comments": [
+    {
+      "commentText": "Comment: 18 pages, 1 table, 4 figures"
+    }
+  ],
+  "keywords": [
+    {
+      "keyString": "Condensed Matter - Superconductivity"
+    },
+    {
+      "keyString": "Condensed Matter - Materials Science"
+    },
+    {
+      "keyString": "Condensed Matter - Strongly Correlated Electrons"
+    }
+  ]
+}
